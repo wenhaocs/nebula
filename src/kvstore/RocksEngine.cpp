@@ -8,6 +8,8 @@
 
 #include <folly/String.h>
 #include <rocksdb/convenience.h>
+#include <rocksdb/env.h>
+#include <rocksdb/trace_reader_writer.h>
 
 #include "common/base/Base.h"
 #include "common/fs/FileUtils.h"
@@ -108,6 +110,10 @@ RocksEngine::RocksEngine(GraphSpaceID spaceId,
   openBackupEngine(spaceId);
 
   rocksdb::Options options;
+  rocksdb::Env* env = rocksdb::Env::Default();
+  rocksdb::EnvOptions env_options(options);
+  std::string trace_path ="/tmp/trace_query";
+  std::unique_ptr<rocksdb::TraceWriter> trace_writer;
   rocksdb::DB* db = nullptr;
   rocksdb::Status status = initRocksdbOptions(options, spaceId, vIdLen);
   CHECK(status.ok()) << status.ToString();
@@ -118,6 +124,8 @@ RocksEngine::RocksEngine(GraphSpaceID spaceId,
     options.compaction_filter_factory = cfFactory;
   }
 
+  /*Create the trace file writer*/
+  rocksdb::NewFileTraceWriter(env, env_options, trace_path, &trace_writer);
   if (readonly) {
     status = rocksdb::DB::OpenForReadOnly(options, path, &db);
   } else {
@@ -128,6 +136,9 @@ RocksEngine::RocksEngine(GraphSpaceID spaceId,
   partsNum_ = allParts().size();
   LOG(INFO) << "open rocksdb on " << path;
 
+  rocksdb::TraceOptions trace_opt;
+  db->StartTrace(trace_opt, std::move(trace_writer));
+
   backup();
 }
 
@@ -136,6 +147,7 @@ void RocksEngine::stop() {
     // Because we trigger compaction in WebService, we need to stop all
     // background work before we stop HttpServer.
     rocksdb::CancelAllBackgroundWork(db_.get(), true);
+    db_->EndTrace();
   }
 }
 
