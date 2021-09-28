@@ -148,6 +148,7 @@ void RocksEngine::stop() {
     // background work before we stop HttpServer.
     rocksdb::CancelAllBackgroundWork(db_.get(), true);
     db_->EndTrace();
+    LOG(INFO) << "stop tracing ...";
   }
 }
 

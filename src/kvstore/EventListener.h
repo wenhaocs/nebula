@@ -208,10 +208,13 @@ class EventListener : public rocksdb::EventListener {
         return "ExternalSstIngestion";
       case rocksdb::CompactionReason::kPeriodicCompaction:
         return "PeriodicCompaction";
+      //  case rocksdb::CompactionReason::kChangeTemperature:
+      //  return "ChangeTemperature";
       case rocksdb::CompactionReason::kNumOfReasons:
         return "NumOfReasons";
+      default:
+        return "Unknown";
     }
-    return "Unknown";
   }
 
   std::string flushReasonString(const rocksdb::FlushReason& reason) {
