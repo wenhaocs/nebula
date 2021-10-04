@@ -181,6 +181,8 @@ class RocksEngine : public KVEngine {
   std::string partKey(PartitionID partId);
 
   void openBackupEngine(GraphSpaceID spaceId);
+  void startTracing(GraphSpaceID spaceId, rocksdb::Options options);
+  void stopTracing();
 
  private:
   GraphSpaceID spaceId_;

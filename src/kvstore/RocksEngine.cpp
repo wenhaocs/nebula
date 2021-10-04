@@ -110,10 +110,6 @@ RocksEngine::RocksEngine(GraphSpaceID spaceId,
   openBackupEngine(spaceId);
 
   rocksdb::Options options;
-  rocksdb::Env* env = rocksdb::Env::Default();
-  rocksdb::EnvOptions env_options(options);
-  std::string trace_path ="/tmp/trace_query";
-  std::unique_ptr<rocksdb::TraceWriter> trace_writer;
   rocksdb::DB* db = nullptr;
   rocksdb::Status status = initRocksdbOptions(options, spaceId, vIdLen);
   CHECK(status.ok()) << status.ToString();
@@ -124,8 +120,6 @@ RocksEngine::RocksEngine(GraphSpaceID spaceId,
     options.compaction_filter_factory = cfFactory;
   }
 
-  /*Create the trace file writer*/
-  rocksdb::NewFileTraceWriter(env, env_options, trace_path, &trace_writer);
   if (readonly) {
     status = rocksdb::DB::OpenForReadOnly(options, path, &db);
   } else {
@@ -136,9 +130,9 @@ RocksEngine::RocksEngine(GraphSpaceID spaceId,
   partsNum_ = allParts().size();
   LOG(INFO) << "open rocksdb on " << path;
 
-  rocksdb::TraceOptions trace_opt;
-  db->StartTrace(trace_opt, std::move(trace_writer));
-
+  if (dataPath_.find("meta") == std::string::npos) {
+    startTracing(spaceId, options);
+  }
   backup();
 }
 
@@ -146,14 +140,31 @@ void RocksEngine::stop() {
   if (db_) {
     // Because we trigger compaction in WebService, we need to stop all
     // background work before we stop HttpServer.
+    stopTracing();
     rocksdb::CancelAllBackgroundWork(db_.get(), true);
-    db_->EndTrace();
-    LOG(INFO) << "stop tracing ...";
   }
 }
 
 std::unique_ptr<WriteBatch> RocksEngine::startBatchWrite() {
   return std::make_unique<RocksWriteBatch>();
+}
+
+void RocksEngine::startTracing(GraphSpaceID spaceId, rocksdb::Options options) {
+  rocksdb::Env* env = rocksdb::Env::Default();
+  rocksdb::EnvOptions env_options(options);
+  std::string trace_path ="/tmp/trace_query_" + std::to_string(spaceId);
+  std::unique_ptr<rocksdb::TraceWriter> trace_writer;
+
+  /*Create the trace file writer*/
+  rocksdb::NewFileTraceWriter(env, env_options, trace_path, &trace_writer);
+  rocksdb::TraceOptions trace_opt;
+  LOG(INFO) << "*********start tracing**********";
+  db_->StartTrace(trace_opt, std::move(trace_writer));
+}
+
+void RocksEngine::stopTracing() {
+  LOG(INFO) << "*********stop tracing**********";
+  db_->EndTrace();
 }
 
 nebula::cpp2::ErrorCode RocksEngine::commitBatchWrite(std::unique_ptr<WriteBatch> batch,
