@@ -77,17 +77,21 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
   std::unordered_set<PartitionID> failedParts;
   std::vector<std::string> keys;
   std::vector<VertexID> vIds;
-  std::unordered_map<VertexID, PartitionID> vid_partid;
+  PartitionID partId;
 
-  RuntimeContext *ctx = &context_.front();
-  // get values
+  RuntimeContext *ctx = &contexts_.front();
+  if (req.get_parts().size() != 1) {
+     LOG(ERROR) << "partition size is not 1"
+     onFinished();
+     return;
+  }
+
   for (const auto& partEntry : req.get_parts()) {
-    auto partId = partEntry.first;
+    partId = partEntry.first;
     for (const auto& row : partEntry.second) {
       CHECK_GE(row.values.size(), 1);
       auto vId = row.values[0].getStr();
       vIds.push_back(vId);
-      vid_partid[vId] = partId;
 
       if (!NebulaKeyUtils::isValidVidLen(spaceVidLen_, vId)) {
         LOG(ERROR) << "Space " << spaceId_ << ", vertex length invalid, "
@@ -98,16 +102,18 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
       }
       
       for(auto tagid: tagIds_) {
-        keys.emplace_back(NebulaKeyUtils::vertexKey(ctx->vIdLen(), partId, vId, tagid);
+        keys.emplace_back(NebulaKeyUtils::vertexKey(ctx->vIdLen(), partId, vId, tagid));
       }
     }
   }
 
   // going to set part num to be 1
   std::vector<std::string> values;
-  ret = ctx->env()->kvstore_->multiget(ctx->spaceId(), partId, keys, &values);
+  auto ret = ctx->env()->kvstore_->multiGet(ctx->spaceId(), partId, keys, &values);
   if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
-    return ret;
+    LOG(ERROR) << "multi get failed"
+    onFinished();
+    return;
   }
 
   int32_t i;
@@ -116,8 +122,8 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
     kv_map[keys[i]] = values[i];
   }
 
-  for (i = 0; i < vIds; i++) {
-    auto ret = plan.go(vid_partid[vIds[i]], vIds[i], kv_map);
+  for (auto vid: vIds) {
+    auto ret = plan.go(partId, vid, kv_map);
       if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
         if (failedParts.find(partId) == failedParts.end()) {
           failedParts.emplace(partId);
@@ -126,7 +132,6 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
       }
     
   }
-
   
   onProcessFinished();
   onFinished();
@@ -227,7 +232,7 @@ StoragePlan<VertexID> GetNeighborsProcessor::buildPlan(RuntimeContext* context,
   std::vector<TagNode*> tags;
   for (const auto& tc : tagContext_.propContexts_) {
     auto tag = std::make_unique<TagNode>(context, &tagContext_, tc.first, &tc.second);
-    tagIds.emplace_back(tc.first);
+    tagIds_.emplace_back(tc.first);
     tags.emplace_back(tag.get());
     plan.addNode(std::move(tag));
   }
