@@ -54,7 +54,8 @@ class RelNode {
     return nebula::cpp2::ErrorCode::SUCCEEDED;
   }
 
-  virtual nebula::cpp2::ErrorCode execute(PartitionID partId, const T& input, std::unordered_map<T, std::string>& value_map) {
+  virtual nebula::cpp2::ErrorCode execute(PartitionID partId, const T& input, std::string& value) {
+    VLOG(1) << "value len" << value.length();
     return execute(partId, input);
   }
 
