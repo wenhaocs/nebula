@@ -76,8 +76,8 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
   auto plan = buildPlan(&contexts_.front(), &expCtxs_.front(), &resultDataSet_, limit, random);
   std::unordered_set<PartitionID> failedParts;
   std::vector<std::string> keys;
-  std::vector<VertexId> vIds;
-  std::unordered_map<VertexId, PartitionId> vid_partid;
+  std::vector<VertexID> vIds;
+  std::unordered_map<VertexID, PartitionID> vid_partid;
 
   // get values
   for (const auto& partEntry : req.get_parts()) {
@@ -104,9 +104,13 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
   RuntimeContext *ctx = &context_.front();
   std::vector<std::string> values;
   ret = ctx->env()->kvstore_->multiget(ctx->spaceId(), partId, keys, &values);
+  if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
+    return ret;
+  }
 
-  for (auto vid: vIds) {
-    auto ret = plan.go(vid_partid[vid], vid);
+  int32_t i;
+  for (i=0; i < vIds.size(); i++) {
+    auto ret = plan.go(vid_partid[vIds[i]], vIds[i], values[i]);
       if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
         if (failedParts.find(partId) == failedParts.end()) {
           failedParts.emplace(partId);
