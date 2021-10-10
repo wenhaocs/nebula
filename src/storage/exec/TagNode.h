@@ -59,6 +59,22 @@ class TagNode final : public IterateNode<VertexID> {
       // regard key not found as succeed as well, upper node will handle it
       return nebula::cpp2::ErrorCode::SUCCEEDED;
     }
+    
+    return ret;
+  }
+
+  nebula::cpp2::ErrorCode execute(PartitionID partId, const VertexID& vId, std::unordered_map<T, std::string>& value_map) override {
+    valid_ = false;
+    auto ret = RelNode::execute(partId, vId);
+    if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
+      return ret;
+    }
+
+    VLOG(1) << "partId " << partId << ", vId " << vId << ", tagId " << tagId_ << ", prop size "
+            << props_->size();
+
+    value_ = value_map[vId];
+    resetReader();
     return ret;
   }
 

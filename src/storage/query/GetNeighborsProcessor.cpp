@@ -61,11 +61,11 @@ void GetNeighborsProcessor::doProcess(const cpp2::GetNeighborsRequest& req) {
   }
 
   // todo(doodle): specify by each query
-  if (!FLAGS_query_concurrently) {
+  // if (!FLAGS_query_concurrently) {
     runInSingleThread(req, limit, random);
-  } else {
-    runInMultipleThread(req, limit, random);
-  }
+  // } else {
+  //  runInMultipleThread(req, limit, random);
+  // }
 }
 
 void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& req,
@@ -75,11 +75,18 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
   expCtxs_.emplace_back(StorageExpressionContext(spaceVidLen_, isIntId_));
   auto plan = buildPlan(&contexts_.front(), &expCtxs_.front(), &resultDataSet_, limit, random);
   std::unordered_set<PartitionID> failedParts;
+  std::vector<std::string> keys;
+  std::vector<VertexId> vIds;
+  std::unordered_map<VertexId, PartitionId> vid_partid;
+
+  // get values
   for (const auto& partEntry : req.get_parts()) {
     auto partId = partEntry.first;
     for (const auto& row : partEntry.second) {
       CHECK_GE(row.values.size(), 1);
       auto vId = row.values[0].getStr();
+      vIds.push_back(vId);
+      vid_partid[vId] = partId;
 
       if (!NebulaKeyUtils::isValidVidLen(spaceVidLen_, vId)) {
         LOG(ERROR) << "Space " << spaceId_ << ", vertex length invalid, "
@@ -88,17 +95,28 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
         onFinished();
         return;
       }
+      
+      keys.emplace_back(NebulaKeyUtils::vertexKey(context_->vIdLen(), partId, vId, tagId_);
+    }
+  }
 
-      // the first column of each row would be the vertex id
-      auto ret = plan.go(partId, vId);
+  // going to set part num to be 1
+  RuntimeContext *ctx = &context_.front();
+  std::vector<std::string> values;
+  ret = ctx->env()->kvstore_->multiget(ctx->spaceId(), partId, keys, &values);
+
+  for (auto vid: vIds) {
+    auto ret = plan.go(vid_partid[vid], vid);
       if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
         if (failedParts.find(partId) == failedParts.end()) {
           failedParts.emplace(partId);
           handleErrorCode(ret, spaceId_, partId);
         }
       }
-    }
+    
   }
+
+  
   onProcessFinished();
   onFinished();
 }

@@ -54,6 +54,10 @@ class RelNode {
     return nebula::cpp2::ErrorCode::SUCCEEDED;
   }
 
+  virtual nebula::cpp2::ErrorCode execute(PartitionID partId, const T& input, std::unordered_map<T, std::string>& value_map) {
+    return execute(partId, input);
+  }
+
   void addDependency(RelNode<T>* dep) {
     dependencies_.emplace_back(dep);
     dep->hasDependents_ = true;

@@ -36,7 +36,7 @@ StorageDAGBenchmark.cpp
 template <typename T>
 class StoragePlan {
  public:
-  nebula::cpp2::ErrorCode go(PartitionID partId, const T& input) {
+  nebula::cpp2::ErrorCode go(PartitionID partId, const T& input, std::unordered_map<T, std::string>& value_map) {
     // find all leaf nodes, and a dummy output node depends on all leaf node.
     if (firstLoop_) {
       auto output = std::make_unique<RelNode<T>>();
@@ -51,7 +51,7 @@ class StoragePlan {
     }
     CHECK_GE(outputIdx_, 0);
     CHECK_LT(outputIdx_, nodes_.size());
-    return nodes_[outputIdx_]->execute(partId, input);
+    return nodes_[outputIdx_]->execute(partId, input, value_map);
   }
 
   nebula::cpp2::ErrorCode go(PartitionID partId) {
