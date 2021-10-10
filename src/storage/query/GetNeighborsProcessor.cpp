@@ -117,16 +117,16 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
   }
 
   std::unordered_map<std::string, std::string> kv_map;
-  for (auto i = 0; i < keys.size(); i++) {
+  for (std::size_t i = 0; i < keys.size(); i++) {
     kv_map[keys[i]] = values[i];
   }
 
   for (auto vid: vIds) {
-    auto ret = plan.go(partId, vid, kv_map);
-      if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
+    auto ret_p = plan.go(partId, vid, kv_map);
+      if (ret_p != nebula::cpp2::ErrorCode::SUCCEEDED) {
         if (failedParts.find(partId) == failedParts.end()) {
           failedParts.emplace(partId);
-          handleErrorCode(ret, spaceId_, partId);
+          handleErrorCode(ret_p, spaceId_, partId);
         }
       }
     
