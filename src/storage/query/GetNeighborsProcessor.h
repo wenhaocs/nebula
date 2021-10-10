@@ -77,6 +77,7 @@ class GetNeighborsProcessor
       bool random);
 
  private:
+  std::vector<TagID> tagIds_;
   std::vector<RuntimeContext> contexts_;
   std::vector<StorageExpressionContext> expCtxs_;
   std::vector<nebula::DataSet> results_;
