@@ -111,7 +111,7 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
   }
 
   int32_t i;
-  unordered_map<std::string, std::string> kv_map;
+  std::unordered_map<std::string, std::string> kv_map;
   for (i = 0; i < keys.size(); i++) {
     kv_map[keys[i]] = values[i];
   }

@@ -63,7 +63,7 @@ class TagNode final : public IterateNode<VertexID> {
     return ret;
   }
 
-  nebula::cpp2::ErrorCode execute(PartitionID partId, const VertexID& vId, unordered_map<std::string, std::string>& kv_map) override {
+  nebula::cpp2::ErrorCode execute(PartitionID partId, const VertexID& vId, std::unordered_map<std::string, std::string>& kv_map) override {
     valid_ = false;
     auto ret = RelNode::execute(partId, vId);
     if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {

@@ -54,7 +54,7 @@ class StoragePlan {
     return nodes_[outputIdx_]->execute(partId, input);
   }
 
-  nebula::cpp2::ErrorCode go(PartitionID partId, const T& input, unordered_map<std::string, std::string>& value) {
+  nebula::cpp2::ErrorCode go(PartitionID partId, const T& input, std::unordered_map<std::string, std::string>& kv_map) {
     // find all leaf nodes, and a dummy output node depends on all leaf node.
     if (firstLoop_) {
       auto output = std::make_unique<RelNode<T>>();
@@ -69,7 +69,7 @@ class StoragePlan {
     }
     CHECK_GE(outputIdx_, 0);
     CHECK_LT(outputIdx_, nodes_.size());
-    return nodes_[outputIdx_]->execute(partId, input, value);
+    return nodes_[outputIdx_]->execute(partId, input, kv_map);
   }
 
   nebula::cpp2::ErrorCode go(PartitionID partId) {
