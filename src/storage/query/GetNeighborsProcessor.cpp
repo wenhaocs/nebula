@@ -81,7 +81,7 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
 
   RuntimeContext *ctx = &contexts_.front();
   if (req.get_parts().size() != 1) {
-     LOG(ERROR) << "partition size is not 1"
+     LOG(ERROR) << "partition size is not 1";
      onFinished();
      return;
   }
@@ -110,15 +110,14 @@ void GetNeighborsProcessor::runInSingleThread(const cpp2::GetNeighborsRequest& r
   // going to set part num to be 1
   std::vector<std::string> values;
   auto ret = ctx->env()->kvstore_->multiGet(ctx->spaceId(), partId, keys, &values);
-  if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
-    LOG(ERROR) << "multi get failed"
+  if (ret.first != nebula::cpp2::ErrorCode::SUCCEEDED) {
+    LOG(ERROR) << "multi get failed";
     onFinished();
     return;
   }
 
-  int32_t i;
   std::unordered_map<std::string, std::string> kv_map;
-  for (i = 0; i < keys.size(); i++) {
+  for (auto i = 0; i < keys.size(); i++) {
     kv_map[keys[i]] = values[i];
   }
 
