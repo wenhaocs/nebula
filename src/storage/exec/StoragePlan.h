@@ -51,7 +51,7 @@ class StoragePlan {
     }
     CHECK_GE(outputIdx_, 0);
     CHECK_LT(outputIdx_, nodes_.size());
-    return nodes_[outputIdx_]->execute(partId, input, value_map);
+    return nodes_[outputIdx_]->execute(partId, input);
   }
 
   nebula::cpp2::ErrorCode go(PartitionID partId, const T& input, std::unordered_map<T, std::string>& value_map) {
