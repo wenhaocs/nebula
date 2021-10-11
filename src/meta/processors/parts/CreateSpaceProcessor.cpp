@@ -8,7 +8,7 @@
 
 #include "meta/ActiveHostsMan.h"
 
-DEFINE_int32(default_parts_num, 100, "The default number of parts when a space is created");
+DEFINE_int32(default_parts_num, 1, "The default number of parts when a space is created");
 DEFINE_int32(default_replica_factor, 1, "The default replica factor when a space is created");
 
 namespace nebula {
@@ -64,6 +64,7 @@ void CreateSpaceProcessor::process(const cpp2::CreateSpaceReq& req) {
     // storage
     properties.set_partition_num(partitionNum);
   }
+  LOG(INFO) << "partition size" << partitionNum;
   if (replicaFactor == 0) {
     replicaFactor = FLAGS_default_replica_factor;
     if (replicaFactor <= 0) {
