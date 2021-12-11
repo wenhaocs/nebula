@@ -13,6 +13,7 @@ nebula_add_test(
     ${ROCKSDB_LIBRARIES}
     ${THRIFT_LIBRARIES}
     ${PROXYGEN_LIBRARIES}
+    ${CACHELIB_LIBRARIES}
     wangle
     gtest
   )
@@ -28,6 +29,7 @@ nebula_add_test(
     ${ROCKSDB_LIBRARIES}
     ${THRIFT_LIBRARIES}
     ${PROXYGEN_LIBRARIES}
+    ${CACHELIB_LIBRARIES}
     wangle
     gtest
   )
