@@ -43,6 +43,7 @@ set(storage_meta_deps
     $<TARGET_OBJECTS:meta_client_stats_obj>
     $<TARGET_OBJECTS:storage_client_stats_obj>
     $<TARGET_OBJECTS:kv_stats_obj>
+    $<TARGET_OBJECTS:storage_cache_obj>
     $<TARGET_OBJECTS:raftex_obj>
     $<TARGET_OBJECTS:wal_obj>
     $<TARGET_OBJECTS:disk_man_obj>
@@ -81,6 +82,7 @@ nebula_add_executable(
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
+        ${CACHELIB_LIBRARIES}
         wangle
 )
 
@@ -103,6 +105,7 @@ nebula_add_executable(
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
+        ${CACHELIB_LIBRARIES}
         wangle
 )
 

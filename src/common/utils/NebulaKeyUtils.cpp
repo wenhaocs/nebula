@@ -261,4 +261,12 @@ std::string NebulaKeyUtils::adminTaskKey(int32_t seqId, JobID jobId, TaskID task
   return key;
 }
 
+std::string NebulaKeyUtils::cacheKey(GraphSpaceID spaceId, const std::string& key) {
+  std::string ret;
+  ret.reserve(sizeof(GraphSpaceID) + key.size());
+  ret.append(reinterpret_cast<const char*>(&spaceId), sizeof(GraphSpaceID));
+  ret.append(key);
+  return ret;
+}
+
 }  // namespace nebula

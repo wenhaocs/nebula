@@ -8,6 +8,7 @@ set(perf_test_deps
     $<TARGET_OBJECTS:storage_transaction_executor>
     $<TARGET_OBJECTS:storage_common_obj>
     $<TARGET_OBJECTS:kvstore_obj>
+    $<TARGET_OBJECTS:storage_cache_obj>
     $<TARGET_OBJECTS:raftex_obj>
     $<TARGET_OBJECTS:wal_obj>
     $<TARGET_OBJECTS:disk_man_obj>
@@ -66,6 +67,7 @@ nebula_add_executable(
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
+        ${CACHELIB_LIBRARIES}
         gtest
 )
 
@@ -89,6 +91,7 @@ nebula_add_executable(
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
+        ${CACHELIB_LIBRARIES}
         gtest
 )
 

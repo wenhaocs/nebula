@@ -23,6 +23,9 @@
 
 DECLARE_uint32(raft_heartbeat_interval_secs);
 DECLARE_bool(auto_remove_invalid_space);
+DECLARE_bool(enable_storage_cache);
+DECLARE_bool(enable_vertex_pool);
+
 const int32_t kDefaultVidLen = 8;
 using nebula::meta::PartHosts;
 
@@ -985,6 +988,81 @@ TEST(NebulaStoreTest, BackupRestoreTest) {
   FLAGS_rocksdb_table_format = "BlockBasedTable";
   FLAGS_rocksdb_wal_dir = "";
   FLAGS_rocksdb_backup_dir = "";
+}
+
+// Test the effect of getting data with cache
+TEST(NebulaStoreTest, CacheAccessTest) {
+  FLAGS_enable_storage_cache = true;
+  FLAGS_enable_vertex_pool = true;
+
+  GraphSpaceID spaceId = 0;
+  std::string prefix = "prefix";
+  fs::TempDir rootPath("/tmp/nebula_store_test.XXXXXX");
+
+  auto partMan = std::make_unique<MemPartManager>();
+  auto ioThreadPool = std::make_shared<folly::IOThreadPoolExecutor>(4);
+  for (auto partId = 0; partId < 6; partId++) {
+    partMan->partsMap_[spaceId][partId] = PartHosts();
+  }
+
+  VLOG(1) << "Total space num is " << partMan->partsMap_.size()
+          << ", total local partitions num is " << partMan->parts(HostAddr("", 0)).size();
+
+  std::vector<std::string> paths;
+  paths.emplace_back(folly::stringPrintf("%s/disk", rootPath.path()));
+
+  KVOptions options;
+  options.dataPaths_ = std::move(paths);
+  options.partMan_ = std::move(partMan);
+  HostAddr local = {"", 0};
+  auto store =
+      std::make_unique<NebulaStore>(std::move(options), ioThreadPool, local, getHandlers());
+  store->init();
+  sleep(1);
+
+  LOG(INFO) << "Put some data then read them...";
+  for (int part = 0; part < 6; part++) {
+    std::vector<KV> data;
+    for (int i = 0; i < 10; i++) {
+      data.emplace_back(prefix +
+                            std::string(reinterpret_cast<const char*>(&part), sizeof(int32_t)) +
+                            std::string(reinterpret_cast<const char*>(&i), sizeof(int32_t)),
+                        folly::stringPrintf("val_%d_%d", part, i));
+    }
+    {
+      folly::Baton<true, std::atomic> baton;
+      store->asyncMultiPut(0, part, std::move(data), [&baton](nebula::cpp2::ErrorCode code) {
+        EXPECT_EQ(nebula::cpp2::ErrorCode::SUCCEEDED, code);
+        baton.post();
+      });
+      baton.wait();
+    }
+
+    {
+      // now try to get a key from kv store
+      // it should be cache miss
+      int key_idx = 5;
+      std::string keyToFetch =
+          prefix + std::string(reinterpret_cast<const char*>(&part), sizeof(int32_t)) +
+          std::string(reinterpret_cast<const char*>(&key_idx), sizeof(int32_t));
+      std::string expectedRet = folly::stringPrintf("val_%d_%d", part, key_idx);
+      std::string value;
+
+      // The cache should not contain the key
+      auto cacheKey = NebulaKeyUtils::cacheKey(spaceId, keyToFetch);
+      bool ret = store->storageCache_->getVertexProp(cacheKey, &value);
+      EXPECT_FALSE(ret);
+
+      store->get(spaceId, part, keyToFetch, &value);
+      EXPECT_TRUE(value == expectedRet);
+
+      // Now get the same key from cache again. Should be cache hit.
+      value.clear();
+      ret = store->storageCache_->getVertexProp(cacheKey, &value);
+      EXPECT_TRUE(ret);
+      EXPECT_TRUE(value == expectedRet);
+    }
+  }
 }
 
 }  // namespace kvstore
