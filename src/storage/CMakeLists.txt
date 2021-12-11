@@ -101,5 +101,10 @@ nebula_add_library(
     GraphStorageLocalServer.cpp
 )
 
+nebula_add_library(
+    storage_cache_obj OBJECT
+    cache/StorageCache.cpp
+)
+
 nebula_add_subdirectory(stats)
 nebula_add_subdirectory(test)
