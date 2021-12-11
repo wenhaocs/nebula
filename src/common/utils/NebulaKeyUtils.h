@@ -148,6 +148,8 @@ class NebulaKeyUtils final {
     return static_cast<NebulaKeyType>(type) == NebulaKeyType::kEdge;
   }
 
+  static bool isTagOrVertex(const folly::StringPiece& rawKey);
+
   static bool isLock(size_t vIdLen, const folly::StringPiece& rawKey) {
     return isEdge(vIdLen, rawKey, kLockVersion);
   }
@@ -254,6 +256,8 @@ class NebulaKeyUtils final {
   static EdgeVerPlaceHolder getLockVersion(const folly::StringPiece&) {
     return 0;
   }
+  // generate cache key from space id and the original key
+  static std::string cacheKey(GraphSpaceID spaceId, const folly::StringPiece& key);
 
   static folly::StringPiece lockWithNoVersion(const folly::StringPiece& rawKey) {
     // TODO(liuyu) We should change the method if varint data version

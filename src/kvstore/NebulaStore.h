@@ -23,6 +23,7 @@
 #include "kvstore/PartManager.h"
 #include "kvstore/raftex/RaftexService.h"
 #include "kvstore/raftex/SnapshotManager.h"
+#include "storage/cache/StorageCache.h"
 
 namespace nebula {
 namespace kvstore {
@@ -52,6 +53,8 @@ class NebulaStore : public KVStore, public Handler {
   FRIEND_TEST(NebulaStoreTest, CheckpointTest);
   FRIEND_TEST(NebulaStoreTest, ThreeCopiesCheckpointTest);
   FRIEND_TEST(NebulaStoreTest, RemoveInvalidSpaceTest);
+  FRIEND_TEST(NebulaStoreTest, GetFillsCacheTest);
+  FRIEND_TEST(NebulaStoreTest, CacheInvalidationTest);
   friend class ListenerBasicTest;
 
  public:
@@ -353,6 +356,7 @@ class NebulaStore : public KVStore, public Handler {
   std::shared_ptr<Part> newPart(GraphSpaceID spaceId,
                                 PartitionID partId,
                                 KVEngine* engine,
+                                storage::StorageCache* storageCache,
                                 bool asLearner,
                                 const std::vector<HostAddr>& defaultPeers);
 
@@ -370,6 +374,15 @@ class NebulaStore : public KVStore, public Handler {
   int32_t getSpaceVidLen(GraphSpaceID spaceId);
 
   void removeSpaceDir(const std::string& dir);
+
+  ErrorOr<nebula::cpp2::ErrorCode, std::pair<meta::cpp2::HostRole, int64_t>> decodeHost(
+      const folly::StringPiece& data);
+
+  nebula::cpp2::ErrorCode getFromKVEngine(GraphSpaceID spaceId,
+                                          PartitionID partId,
+                                          const std::string& key,
+                                          std::string* value,
+                                          bool canReadFromFollower);
 
  private:
   // The lock used to protect spaces_
@@ -392,6 +405,11 @@ class NebulaStore : public KVStore, public Handler {
   folly::ConcurrentHashMap<std::string, std::function<void(std::shared_ptr<Part>&)>>
       onNewPartAdded_;
   std::function<void(GraphSpaceID)> beforeRemoveSpace_{nullptr};
+
+  // We temporarily put storage cache as a member of nebula store.
+  // Need to make both cache and nebula store as a composite class with refactor.
+  // TODO: https://github.com/vesoft-inc/nebula/issues/3517
+  std::unique_ptr<storage::StorageCache> storageCache_{nullptr};
 };
 
 }  // namespace kvstore

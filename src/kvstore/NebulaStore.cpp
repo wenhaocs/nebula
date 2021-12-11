@@ -29,6 +29,9 @@ DECLARE_bool(rocksdb_disable_wal);
 DECLARE_int32(rocksdb_backup_interval_secs);
 DECLARE_int32(wal_ttl);
 
+DEFINE_bool(enable_storage_cache, false, "Whether to enable storage cache");
+DEFINE_bool(enable_vertex_pool, false, "Whether to add vertex pool in cache");
+
 namespace nebula {
 namespace kvstore {
 
@@ -48,6 +51,25 @@ NebulaStore::~NebulaStore() {
 }
 
 bool NebulaStore::init() {
+  // init cache
+  bool ret;
+  if (FLAGS_enable_storage_cache) {
+    storageCache_ = std::make_unique<storage::StorageCache>();
+    ret = storageCache_->init();
+    if (!ret) {
+      LOG(ERROR) << "nebula storage cache init failed";
+      return false;
+    }
+
+    if (FLAGS_enable_vertex_pool) {
+      ret = storageCache_->createVertexPool();
+      if (!ret) {
+        LOG(ERROR) << "adding vertex cache pool failed";
+        return false;
+      }
+    }
+  }
+
   LOG(INFO) << "Start the raft service...";
   bgWorkers_ = std::make_shared<thread::GenericThreadPool>();
   bgWorkers_->start(FLAGS_num_workers, "nebula-bgworkers");
@@ -141,7 +163,7 @@ void NebulaStore::loadPartFromDataPath() {
         LOG(INFO) << "Need to open " << partIds.size() << " parts of space " << spaceId;
         for (auto& partId : partIds) {
           bgWorkers_->addTask([spaceId, partId, enginePtr, &counter, &baton, this]() mutable {
-            auto part = newPart(spaceId, partId, enginePtr, false, {});
+            auto part = newPart(spaceId, partId, enginePtr, storageCache_.get(), false, {});
             LOG(INFO) << "Load part " << spaceId << ", " << partId << " from disk";
 
             {
@@ -325,8 +347,8 @@ void NebulaStore::addPart(GraphSpaceID spaceId,
 
   // Write the information into related engine.
   targetEngine->addPart(partId);
-  spaceIt->second->parts_.emplace(partId,
-                                  newPart(spaceId, partId, targetEngine.get(), asLearner, peers));
+  spaceIt->second->parts_.emplace(
+      partId, newPart(spaceId, partId, targetEngine.get(), storageCache_.get(), asLearner, peers));
   LOG(INFO) << "Space " << spaceId << ", part " << partId << " has been added, asLearner "
             << asLearner;
 }
@@ -334,6 +356,7 @@ void NebulaStore::addPart(GraphSpaceID spaceId,
 std::shared_ptr<Part> NebulaStore::newPart(GraphSpaceID spaceId,
                                            PartitionID partId,
                                            KVEngine* engine,
+                                           storage::StorageCache* storageCache,
                                            bool asLearner,
                                            const std::vector<HostAddr>& defaultPeers) {
   auto walPath = folly::stringPrintf("%s/wal/%d", engine->getWalRoot(), partId);
@@ -342,6 +365,7 @@ std::shared_ptr<Part> NebulaStore::newPart(GraphSpaceID spaceId,
                                      raftAddr_,
                                      walPath,
                                      engine,
+                                     storageCache,
                                      ioPool_,
                                      bgWorkers_,
                                      workers_,
@@ -573,11 +597,11 @@ void NebulaStore::removeSpaceDir(const std::string& dir) {
   }
 }
 
-nebula::cpp2::ErrorCode NebulaStore::get(GraphSpaceID spaceId,
-                                         PartitionID partId,
-                                         const std::string& key,
-                                         std::string* value,
-                                         bool canReadFromFollower) {
+nebula::cpp2::ErrorCode NebulaStore::getFromKVEngine(GraphSpaceID spaceId,
+                                                     PartitionID partId,
+                                                     const std::string& key,
+                                                     std::string* value,
+                                                     bool canReadFromFollower) {
   auto ret = part(spaceId, partId);
   if (!ok(ret)) {
     return error(ret);
@@ -613,6 +637,30 @@ void NebulaStore::ReleaseSnapshot(GraphSpaceID spaceId, PartitionID partId, cons
   }
   auto part = nebula::value(ret);
   return part->engine()->ReleaseSnapshot(snapshot);
+}
+
+nebula::cpp2::ErrorCode NebulaStore::get(GraphSpaceID spaceId,
+                                         PartitionID partId,
+                                         const std::string& key,
+                                         std::string* value,
+                                         bool canReadFromFollower) {
+  // Currently nebula only reads from leader. We may have to revisit this if we support reading from
+  // follower.
+  if (storageCache_ && storageCache_->vertexPoolExists()) {
+    auto cacheKey = NebulaKeyUtils::cacheKey(spaceId, key);
+    auto exist = storageCache_->getVertexProp(cacheKey, value);
+    if (exist) {
+      return nebula::cpp2::ErrorCode::SUCCEEDED;
+    } else {
+      auto ret = getFromKVEngine(spaceId, partId, key, value, canReadFromFollower);
+      if (ret == nebula::cpp2::ErrorCode::SUCCEEDED) {  // only write cache when the tag is found
+        storageCache_->putVertexProp(cacheKey, *value);
+      }
+      return ret;
+    }
+  }
+
+  return getFromKVEngine(spaceId, partId, key, value, canReadFromFollower);
 }
 
 std::pair<nebula::cpp2::ErrorCode, std::vector<Status>> NebulaStore::multiGet(

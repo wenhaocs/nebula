@@ -86,6 +86,18 @@ std::string NebulaKeyUtils::vertexKey(size_t vIdLen,
       .append(vIdLen - vId.size(), pad);
   return key;
 }
+
+// static
+bool NebulaKeyUtils::isTagOrVertex(const folly::StringPiece& rawKey) {
+  if (rawKey.size() < kTagLen) {
+    return false;
+  }
+  constexpr int32_t len = static_cast<int32_t>(sizeof(NebulaKeyType));
+  auto type = readInt<uint32_t>(rawKey.data(), len) & kTypeMask;
+  return (static_cast<NebulaKeyType>(type) == NebulaKeyType::kEdge) ||
+         (static_cast<NebulaKeyType>(type) == NebulaKeyType::kVertex);
+}
+
 // static
 std::string NebulaKeyUtils::systemCommitKey(PartitionID partId) {
   int32_t item = (partId << kPartitionOffset) | static_cast<uint32_t>(NebulaKeyType::kSystem);
@@ -267,6 +279,14 @@ std::string NebulaKeyUtils::dataVersionKey() {
 
 std::string NebulaKeyUtils::dataVersionValue() {
   return "3.0";
+}
+
+std::string NebulaKeyUtils::cacheKey(GraphSpaceID spaceId, const folly::StringPiece& key) {
+  std::string ret;
+  ret.reserve(sizeof(GraphSpaceID) + key.size());
+  ret.append(reinterpret_cast<const char*>(&spaceId), sizeof(GraphSpaceID));
+  ret.append(key.data(), key.size());
+  return ret;
 }
 
 }  // namespace nebula

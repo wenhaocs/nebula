@@ -134,6 +134,20 @@ class CacheLibLRU {
   }
 
   /**
+   * @brief CacheLib remove items in batch
+   *
+   * @param keys
+   * @return nebula::cpp2::ErrorCode
+   */
+  nebula::cpp2::ErrorCode invalidateItemsInBatch(const std::vector<std::string>& keys) {
+    std::unique_lock<std::shared_mutex> guard(lock_);
+    for (auto key : keys) {
+      nebulaCache_->remove(key);
+    }
+    return nebula::cpp2::ErrorCode::SUCCEEDED;
+  }
+
+  /**
    * @brief Get the configured size of the pool
    *
    * @param poolName
