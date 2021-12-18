@@ -141,7 +141,6 @@ set(PROXYGEN_LIBRARIES
 set(ROCKSDB_LIBRARIES ${Rocksdb_LIBRARY})
 set(CACHELIB_LIBRARIES ${CacheLib_LIBRARIES})
 
-
 # All compression libraries
 set(COMPRESSION_LIBRARIES bz2 snappy zstd z lz4)
 if (LIBLZMA_FOUND)

@@ -76,7 +76,7 @@ class CacheLibLRU {
    * @return Status error (cache miss) or value
    */
   StatusOr<std::string> get(const std::string& key) {
-    std::shared_lock<std::shared_mutex> readLock(lock_);
+    std::shared_lock<std::shared_mutex> guard(lock_);
     auto itemHandle = nCache_->find(key);
     if (itemHandle) {
       return std::string(reinterpret_cast<const char*>(itemHandle->getMemory()),
@@ -107,7 +107,7 @@ class CacheLibLRU {
     }
 
     {
-      std::unique_lock<std::shared_mutex> writeLock(lock_);
+      std::unique_lock<std::shared_mutex> guard(lock_);
       std::memcpy(itemHandle->getMemory(), value.data(), value.size());
       nCache_->insertOrReplace(itemHandle);
     }
