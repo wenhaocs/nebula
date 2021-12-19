@@ -13,7 +13,7 @@
 #  CacheLib_INCLUDE_DIR      The CacheLib includes directories.
 #  CacheLib_LIBRARY          The CacheLib library.
 
-find_path(C_INCLUDE_DIR NAMES cachelib)
+find_path(CacheLib_INCLUDE_DIR NAMES cachelib)
 find_library(CacheLib_ALLOCATOR NAMES libcachelib_allocator.a)
 find_library(CacheLib_DATATYPE NAMES libcachelib_datatype.a)
 find_library(CacheLib_SHM NAMES libcachelib_shm.a)
