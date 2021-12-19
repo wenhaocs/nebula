@@ -11,7 +11,7 @@
 #
 #  CacheLib_FOUND            System has CacheLib, include and lib dirs found
 #  CacheLib_INCLUDE_DIR      The CacheLib includes directories.
-#  CacheLib_LIBRARY          The CacheLib library.
+#  CacheLib_LIBRARIES        The CacheLib libraries.
 
 find_path(CacheLib_INCLUDE_DIR NAMES cachelib)
 find_library(CacheLib_ALLOCATOR NAMES libcachelib_allocator.a)
