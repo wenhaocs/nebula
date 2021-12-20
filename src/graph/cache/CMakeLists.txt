@@ -7,3 +7,4 @@ nebula_add_library(
     GraphCache.cpp
 )
 
+nebula_add_subdirectory(test)

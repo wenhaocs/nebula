@@ -1,0 +1,33 @@
+SET(CONTEXT_TEST_LIBS
+)
+
+nebula_add_executable(
+    NAME
+        iterator_bm
+    SOURCES
+        IteratorBenchmark.cpp
+    OBJECTS
+        ${CONTEXT_TEST_LIBS}
+    LIBRARIES
+        follybenchmark
+        boost_regex
+        ${THRIFT_LIBRARIES}
+        wangle
+        ${PROXYGEN_LIBRARIES}
+)
+
+nebula_add_executable(
+    NAME
+        graph_cache_test
+    SOURCES
+        GraphCacheTest.cpp
+    OBJECTS
+        $<TARGET_OBJECTS:graph_cache_obj>
+        ${CONTEXT_TEST_LIBS}
+    LIBRARIES
+        ${THRIFT_LIBRARIES}
+        ${PROXYGEN_LIBRARIES}
+        ${CACHELIB_LIBRARIES}
+        wangle
+        gtest
+)
