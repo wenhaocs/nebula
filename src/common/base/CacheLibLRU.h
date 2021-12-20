@@ -169,7 +169,7 @@ class CacheLibLRU {
       for (const auto& c : chained_allocs.getChain()) {
         chainToReturn.emplace_back(reinterpret_cast<const char*>(c.getMemory()));
       }
-      return std::move(chainToReturn);
+      return chainToReturn;
     }
     return Status::Error("Cache miss!");
   }

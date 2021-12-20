@@ -84,7 +84,7 @@ TEST_F(GraphCacheTest, TestTTL) {
 
   // sleep 3s and get again
   std::this_thread::sleep_for(std::chrono::seconds(3));
-  auto status = cache->getEdges(graphKey1);
+  status = cache->getEdges(graphKey1);
   EXPECT_FALSE(status.ok());
 }
 
