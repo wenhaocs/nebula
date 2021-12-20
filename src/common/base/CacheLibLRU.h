@@ -154,6 +154,12 @@ class CacheLibLRU {
     return Status::OK();
   }
 
+  /**
+   * @brief Get the whole chain of values via key
+   *
+   * @param key
+   * @return StatusOr<std::vector<std::string>>
+   */
   StatusOr<std::vector<std::string>> getAsChain(const std::string& key) {
     std::shared_lock<std::shared_mutex> guard(lock_);
     auto parentItemHandle = nCache_->find(key);
