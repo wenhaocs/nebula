@@ -15,6 +15,7 @@
 namespace nebula {
 
 using Cache = facebook::cachelib::LruAllocator;
+static const char kParentItemValue[] = "__parent_value__";
 
 class CacheLibLRU {
  public:
@@ -112,6 +113,59 @@ class CacheLibLRU {
       nCache_->insertOrReplace(itemHandle);
     }
     return Status::OK();
+  }
+
+  /**
+   * @brief Insert a list of values as a chain under the same key to cache.
+   *        Note here we need a dummy handle as parent.
+   *
+   * @param key
+   * @param values
+   * @param poolName
+   * @param ttl
+   * @return Status
+   */
+  Status putAsChain(const std::string& key,
+                    const std::vector<std::string>& values,
+                    std::string poolName,
+                    uint32_t ttl = 300) {
+    if (poolIdMap_.find(poolName) == poolIdMap_.end()) {
+      return Status::Error("Cache write error. Pool does not exist: %s", poolName.data());
+    }
+    auto parentItemHandle =
+        nCache_->allocate(poolIdMap_[poolName], key, sizeof(kParentItemValue), ttl);
+    if (!parentItemHandle) {
+      return Status::Error("Cache write error. Too many pending writes.");
+    }
+
+    {
+      std::unique_lock<std::shared_mutex> guard(lock_);
+      for (auto& item : values) {
+        auto itemHandle = nCache_->allocateChainedItem(parentItemHandle, item.size());
+        if (!itemHandle) {
+          return Status::Error("Cache write error. Too many pending writes.");
+        }
+        std::memcpy(itemHandle->getMemory(), item.data(), item.size());
+        nCache_->addChainedItem(parentItemHandle, std::move(itemHandle));
+      }
+
+      nCache_->insertOrReplace(parentItemHandle);
+    }
+    return Status::OK();
+  }
+
+  StatusOr<std::vector<std::string>> getAsChain(const std::string& key) {
+    std::shared_lock<std::shared_mutex> guard(lock_);
+    auto parentItemHandle = nCache_->find(key);
+    if (parentItemHandle) {
+      std::vector<std::string> chainToReturn;
+      auto chained_allocs = nCache_->viewAsChainedAllocs(parentItemHandle);
+      for (const auto& c : chained_allocs.getChain()) {
+        chainToReturn.emplace_back(reinterpret_cast<const char*>(c.getMemory()));
+      }
+      return std::move(chainToReturn);
+    }
+    return Status::Error("Cache miss!");
   }
 
   /**
