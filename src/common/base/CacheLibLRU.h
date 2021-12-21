@@ -44,7 +44,7 @@ class CacheLibLRU {
       // the service.
       return Status::Error("Cache configuration error: %s", e.what());
     }
-    nCache_ = std::make_unique<Cache>(config);
+    nebulaCache_ = std::make_unique<Cache>(config);
 
     return Status::OK();
   }
@@ -61,7 +61,7 @@ class CacheLibLRU {
       return Status::Error("Cache pool creation error. Cache pool exists: %s", poolName.data());
     }
     try {
-      auto poolId = nCache_->addPool(poolName, poolSize * 1024 * 1024);
+      auto poolId = nebulaCache_->addPool(poolName, poolSize * 1024 * 1024);
       poolIdMap_[poolName] = poolId;
     } catch (const std::exception& e) {
       return Status::Error("Adding cache pool error: %s", e.what());
@@ -77,7 +77,7 @@ class CacheLibLRU {
    */
   StatusOr<std::string> get(const std::string& key) {
     std::shared_lock<std::shared_mutex> guard(lock_);
-    auto itemHandle = nCache_->find(key);
+    auto itemHandle = nebulaCache_->find(key);
     if (itemHandle) {
       return std::string(reinterpret_cast<const char*>(itemHandle->getMemory()),
                          itemHandle->getSize());
@@ -101,7 +101,7 @@ class CacheLibLRU {
     if (poolIdMap_.find(poolName) == poolIdMap_.end()) {
       return Status::Error("Cache write error. Pool does not exists: %s", poolName.data());
     }
-    auto itemHandle = nCache_->allocate(poolIdMap_[poolName], key, value.size(), ttl);
+    auto itemHandle = nebulaCache_->allocate(poolIdMap_[poolName], key, value.size(), ttl);
     if (!itemHandle) {
       return Status::Error("Cache write error. Too many pending writes.");
     }
@@ -109,7 +109,7 @@ class CacheLibLRU {
     {
       std::unique_lock<std::shared_mutex> guard(lock_);
       std::memcpy(itemHandle->getMemory(), value.data(), value.size());
-      nCache_->insertOrReplace(itemHandle);
+      nebulaCache_->insertOrReplace(itemHandle);
     }
     return Status::OK();
   }
@@ -121,7 +121,9 @@ class CacheLibLRU {
    *
    * @param key
    */
-  void invalidateItem(const std::string& key) { nCache_->remove(key); }  // do we need to lock here?
+  void invalidateItem(const std::string& key) {
+    nebulaCache_->remove(key);
+  }  // do we need to lock here?
 
   /**
    * @brief Get the configured size of the pool
@@ -133,11 +135,11 @@ class CacheLibLRU {
     if (poolIdMap_.find(poolName) == poolIdMap_.end()) {
       return Status::Error("Cache write error. Pool does not exists: %s", poolName.data());
     }
-    return nCache_->getPoolStats(poolIdMap_[poolName]).poolSize;
+    return nebulaCache_->getPoolStats(poolIdMap_[poolName]).poolSize;
   }
 
  private:
-  std::unique_ptr<Cache> nCache_{nullptr};
+  std::unique_ptr<Cache> nebulaCache_{nullptr};
   std::unordered_map<std::string, facebook::cachelib::PoolId> poolIdMap_;
   std::string name_;
   uint32_t capacity_ = 0;       // in MB

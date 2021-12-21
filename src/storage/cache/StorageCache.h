@@ -40,7 +40,7 @@ class StorageCache {
   bool getVertexProp(std::string& key, std::string* value);
 
   // insert or update vertex property in cache
-  bool putVertexProp(std::string key, std::string value, uint32_t ttl);
+  bool putVertexProp(std::string& key, std::string& value, uint32_t ttl);
 
   // evict a vertex in cache
   void invalidateVertex(std::string& key);
