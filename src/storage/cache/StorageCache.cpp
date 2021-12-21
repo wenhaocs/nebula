@@ -64,7 +64,7 @@ bool StorageCache::getVertexProp(std::string& key, std::string* value) {
 // We do not use async mode here via returning future to ensure strong consistency.
 // Or maybe we can separate this function into putVertexPropOnMiss and putVertexPropOnWrite,
 // and the former one can return a future.
-bool StorageCache::putVertexProp(std::string key, std::string value, uint32_t ttl) {
+bool StorageCache::putVertexProp(std::string& key, std::string& value, uint32_t ttl) {
   if (!vertexPool_) {
     LOG(ERROR) << "No vertext pool exists!";
     return false;
