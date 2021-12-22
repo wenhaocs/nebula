@@ -15,6 +15,8 @@ DECLARE_uint32(graph_cache_locks_power);
 
 DECLARE_uint32(edge_pool_capacity);
 
+DECLARE_uint32(edge_item_ttl);
+
 namespace nebula {
 namespace graph {
 
@@ -51,7 +53,8 @@ TEST_F(GraphCacheTest, SimpleTest) {
   EXPECT_EQ(cache->getEdgePoolSize(), FLAGS_edge_pool_capacity);
 
   // put edges
-  ret = cache->addAllEdges(graphKey1, edges1, 60);
+  FLAGS_edge_item_ttl = 60;
+  ret = cache->addAllEdges(graphKey1, edges1);
   EXPECT_TRUE(ret);
 
   // get edges
@@ -73,7 +76,8 @@ TEST_F(GraphCacheTest, TestTTL) {
   EXPECT_EQ(cache->getEdgePoolSize(), FLAGS_edge_pool_capacity);
 
   // put vertex with ttl of 2
-  ret = cache->addAllEdges(graphKey1, edges1, 2);
+  FLAGS_edge_item_ttl = 2;
+  ret = cache->addAllEdges(graphKey1, edges1);
   EXPECT_TRUE(ret);
 
   // get edges

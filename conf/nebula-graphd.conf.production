@@ -98,4 +98,9 @@
 --graph_cache_locks_power=5
 # Edge pool size in MB
 --edge_pool_capacity=50
-
+# Vertex pool size in MB
+--vertex_pool_capacity=50
+# Vertex item ttl in seconds
+--vertex_item_ttl=300
+# Edge item ttl in seconds
+--edge_item_ttl=300

@@ -12,8 +12,16 @@
 namespace nebula {
 namespace graph {
 
+static const char kVertexPoolName[] = "VertextPool";
 static const char kEdgePoolName[] = "EdgePool";
 static const char kGraphCacheName[] = "__GraphCache__";
+
+struct VertexPoolInfo {
+  std::string poolName_;
+  uint32_t capacity_;
+  VertexPoolInfo(std::string poolName, uint32_t capacity)
+      : poolName_(poolName), capacity_(capacity) {}
+};
 
 struct EdgePoolInfo {
   std::string poolName_;
@@ -30,6 +38,9 @@ class GraphCache {
 
   bool init();
 
+  // create a vertex cache as pool
+  bool createVertexPool(std::string poolName = kVertexPoolName);
+
   // create a edge cache as pool
   bool createEdgePool(std::string poolName = kEdgePoolName);
 
@@ -40,7 +51,7 @@ class GraphCache {
   StatusOr<std::vector<std::string>> getEdges(std::string& key);
 
   // insert the edges of a vertex as a whole
-  bool addAllEdges(std::string& key, std::vector<std::string>& edges, uint32_t ttl = 300);
+  bool addAllEdges(std::string& key, std::vector<std::string>& edges);
 
   // evict a vertex in cache
   void invalidateEdges(std::string& key);
@@ -48,9 +59,22 @@ class GraphCache {
   // get the size of the vertex pool
   uint32_t getEdgePoolSize();
 
+  // get vertex property via key
+  bool getVertexProp(std::string& key, std::string* value);
+
+  // insert or update vertex property in cache
+  bool putVertexProp(std::string& key, std::string& value);
+
+  // evict a vertex in cache
+  void invalidateVertex(std::string& key);
+
+  // get the size of the vertex pool
+  uint32_t getVertexPoolSize();
+
  private:
   uint32_t capacity_ = 0;  // in MB
   std::unique_ptr<CacheLibLRU> cacheInternal_{nullptr};
+  std::shared_ptr<VertexPoolInfo> vertexPool_{nullptr};
   std::shared_ptr<EdgePoolInfo> edgePool_{nullptr};
 };
 
