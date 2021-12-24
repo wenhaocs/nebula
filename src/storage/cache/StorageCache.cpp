@@ -20,6 +20,7 @@ DEFINE_uint32(storage_cache_locks_power,
               "E.g., in case of 5, the total number of buckets will be 2^5.");
 
 DEFINE_uint32(vertex_pool_capacity, 50, "Vertex pool size in MB");
+DEFINE_uint32(vertex_item_ttl, 300, "TTL for vertex item in the cache");
 
 namespace nebula {
 namespace storage {
@@ -33,6 +34,7 @@ StorageCache::StorageCache() {
 }
 
 bool StorageCache::init() {
+  LOG(INFO) << "Start storage cache...";
   auto status = cacheInternal_->initializeCache();
   if (!status.ok()) {
     LOG(ERROR) << status;
@@ -42,6 +44,7 @@ bool StorageCache::init() {
 }
 
 bool StorageCache::createVertexPool(std::string poolName) {
+  LOG(INFO) << "Create vertex pool: " << poolName;
   auto status = cacheInternal_->addPool(poolName, FLAGS_vertex_pool_capacity);
   if (!status.ok()) {
     LOG(ERROR) << status;
@@ -51,7 +54,7 @@ bool StorageCache::createVertexPool(std::string poolName) {
   return true;
 }
 
-bool StorageCache::getVertexProp(std::string& key, std::string* value) {
+bool StorageCache::getVertexProp(const std::string& key, std::string* value) {
   auto ret = cacheInternal_->get(key);
   if (!ret.ok()) {
     return false;
@@ -64,12 +67,12 @@ bool StorageCache::getVertexProp(std::string& key, std::string* value) {
 // We do not use async mode here via returning future to ensure strong consistency.
 // Or maybe we can separate this function into putVertexPropOnMiss and putVertexPropOnWrite,
 // and the former one can return a future.
-bool StorageCache::putVertexProp(std::string& key, std::string& value, uint32_t ttl) {
+bool StorageCache::putVertexProp(const std::string& key, std::string& value) {
   if (!vertexPool_) {
     LOG(ERROR) << "No vertext pool exists!";
     return false;
   }
-  auto status = cacheInternal_->put(key, value, vertexPool_->poolName_, ttl);
+  auto status = cacheInternal_->put(key, value, vertexPool_->poolName_, FLAGS_vertex_item_ttl);
   if (!status.ok()) {
     return false;
   }
