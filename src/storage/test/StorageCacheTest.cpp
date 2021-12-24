@@ -15,6 +15,8 @@ DECLARE_uint32(storage_cache_locks_power);
 
 DECLARE_uint32(vertex_pool_capacity);
 
+DECLARE_uint32(vertex_item_ttl);
+
 namespace nebula {
 namespace storage {
 /*
@@ -53,7 +55,7 @@ TEST_F(StorageCacheTest, SimpleTest) {
   EXPECT_EQ(cache->getVertexPoolSize(), FLAGS_vertex_pool_capacity);
 
   // put vertex
-  ret = cache->putVertexProp(vertexKey1, vertexProp1, 60);
+  ret = cache->putVertexProp(vertexKey1, vertexProp1);
   EXPECT_TRUE(ret);
 
   // get value
@@ -79,8 +81,9 @@ TEST_F(StorageCacheTest, TestTTL) {
   EXPECT_TRUE(ret);
   EXPECT_EQ(cache->getVertexPoolSize(), FLAGS_vertex_pool_capacity);
 
-  // put vertex with ttl of 5
-  ret = cache->putVertexProp(vertexKey1, vertexProp1, 2);
+  // put vertex with ttl of 2
+  FLAGS_vertex_item_ttl = 2;
+  ret = cache->putVertexProp(vertexKey1, vertexProp1);
   EXPECT_TRUE(ret);
 
   // get value first
@@ -118,8 +121,7 @@ TEST_F(StorageCacheTest, PutIntoNonExistingPool) {
   ret = cache->init();
   EXPECT_TRUE(ret);
 
-  // put vertex with ttl of 5
-  ret = cache->putVertexProp(vertexKey1, vertexProp1, 2);
+  ret = cache->putVertexProp(vertexKey1, vertexProp1);
   EXPECT_FALSE(ret);
 }
 
