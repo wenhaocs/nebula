@@ -37,16 +37,19 @@ class StorageCache {
   bool createEdgePool(std::string& key, std::string* value);
 
   // get vertex property via key
-  bool getVertexProp(std::string& key, std::string* value);
+  bool getVertexProp(const std::string& key, std::string* value);
 
   // insert or update vertex property in cache
-  bool putVertexProp(std::string& key, std::string& value, uint32_t ttl);
+  bool putVertexProp(const std::string& key, std::string& value);
 
   // evict a vertex in cache
   void invalidateVertex(std::string& key);
 
   // get the size of the vertex pool
   uint32_t getVertexPoolSize();
+
+  // check whether vertex pool exists
+  bool vertexPoolExists() { return vertexPool_ != nullptr; }
 
  private:
   uint32_t capacity_ = 0;  // in MB
