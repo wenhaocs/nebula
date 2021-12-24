@@ -126,3 +126,5 @@
 --storage_cache_locks_power=5
 # Vertex pool size in MB
 --vertex_pool_capacity=50
+# TTL in seconds for vertex item in the cache
+--vertex_item_ttl=50
