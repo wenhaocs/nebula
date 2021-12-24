@@ -138,6 +138,19 @@ class CacheLibLRU {
     return nebulaCache_->getPoolStats(poolIdMap_[poolName]).poolSize;
   }
 
+  /**
+   * @brief Get the count of cache hit of a pool
+   *
+   * @param poolName
+   * @return Status error (pool not existing) or unit64_t
+   */
+  StatusOr<uint64_t> getPoolCacheHitCount(const std::string& poolName) {
+    if (poolIdMap_.find(poolName) == poolIdMap_.end()) {
+      return Status::Error("Get cache hit count error. Pool does not exists: %s", poolName.data());
+    }
+    return nebulaCache_->getPoolStats(poolIdMap_[poolName]).numPoolGetHits;
+  }
+
  private:
   std::unique_ptr<Cache> nebulaCache_{nullptr};
   std::unordered_map<std::string, facebook::cachelib::PoolId> poolIdMap_;
