@@ -26,7 +26,9 @@ class StorageCache {
  public:
   StorageCache();
 
-  ~StorageCache() { LOG(INFO) << "Destroy storage cache"; }
+  ~StorageCache() {
+    LOG(INFO) << "Destroy storage cache";
+  }
 
   bool init();
 
@@ -49,7 +51,9 @@ class StorageCache {
   uint32_t getVertexPoolSize();
 
   // check whether vertex pool exists
-  bool vertexPoolExists() { return vertexPool_ != nullptr; }
+  bool vertexPoolExists() {
+    return vertexPool_ != nullptr;
+  }
 
  private:
   uint32_t capacity_ = 0;  // in MB
