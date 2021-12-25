@@ -79,7 +79,9 @@ bool StorageCache::putVertexProp(const std::string& key, std::string& value) {
   return true;
 }
 
-void StorageCache::invalidateVertex(std::string& key) { cacheInternal_->invalidateItem(key); }
+void StorageCache::invalidateVertex(std::string& key) {
+  cacheInternal_->invalidateItem(key);
+}
 
 uint32_t StorageCache::getVertexPoolSize() {
   auto ret = cacheInternal_->getConfiguredPoolSize(vertexPool_->poolName_);
