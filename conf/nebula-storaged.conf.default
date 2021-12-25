@@ -127,4 +127,4 @@
 # Vertex pool size in MB
 --vertex_pool_capacity=50
 # TTL in seconds for vertex items in the cache
---vertex_item_ttl=50
+--vertex_item_ttl=300
