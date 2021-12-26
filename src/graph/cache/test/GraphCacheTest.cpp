@@ -60,6 +60,10 @@ TEST_F(GraphCacheTest, SimpleTest) {
   // get edges
   auto status = cache->getEdges(graphKey1);
   EXPECT_TRUE(status.ok());
+  std::vector<std::string> output = status.value();
+  for (auto str : output) {
+    LOG(INFO) << "******" << str;
+  }
   EXPECT_EQ(status.value().size(), 3);
 }
 
