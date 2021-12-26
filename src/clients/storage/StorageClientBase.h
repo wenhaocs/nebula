@@ -10,6 +10,7 @@
 #include <folly/futures/Future.h>
 
 #include "clients/meta/MetaClient.h"
+#include "clients/storage/StorageClientCache.h"
 #include "common/base/Base.h"
 #include "common/base/StatusOr.h"
 #include "common/meta/Common.h"
@@ -221,6 +222,7 @@ class StorageClientBase {
  private:
   std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool_;
   std::unique_ptr<thrift::ThriftClientManager<ClientType>> clientsMan_;
+  std::unique_ptr<nebula::graph::StorageClientCache> clientCache_;
 };
 
 }  // namespace storage
