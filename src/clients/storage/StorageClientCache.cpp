@@ -64,8 +64,7 @@ StatusOr<GetNeighborsResponse> StorageClientCache::getCacheValue(const GetNeighb
   return resp;
 }
 
-template <>
-void StorageClientCache::insertResultIntoCache<GetNeighborsResponse>(GetNeighborsResponse& resp) {
+void StorageClientCache::insertResultIntoCache(GetNeighborsResponse& resp) {
   auto dataset = resp.get_vertices();
   if (dataset == nullptr) {
     LOG(INFO) << "GraphCache Empty dataset in response";
