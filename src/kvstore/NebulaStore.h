@@ -53,7 +53,8 @@ class NebulaStore : public KVStore, public Handler {
   FRIEND_TEST(NebulaStoreTest, CheckpointTest);
   FRIEND_TEST(NebulaStoreTest, ThreeCopiesCheckpointTest);
   FRIEND_TEST(NebulaStoreTest, RemoveInvalidSpaceTest);
-  FRIEND_TEST(NebulaStoreTest, CacheAccessTest);
+  FRIEND_TEST(NebulaStoreTest, GetFillsCacheTest);
+  FRIEND_TEST(NebulaStoreTest, CacheInvalidationTest);
   friend class ListenerBasicTest;
 
  public:
@@ -333,6 +334,7 @@ class NebulaStore : public KVStore, public Handler {
   std::shared_ptr<Part> newPart(GraphSpaceID spaceId,
                                 PartitionID partId,
                                 KVEngine* engine,
+                                storage::StorageCache* storageCache,
                                 bool asLearner,
                                 const std::vector<HostAddr>& defaultPeers);
 

@@ -163,7 +163,7 @@ void NebulaStore::loadPartFromDataPath() {
         LOG(INFO) << "Need to open " << partIds.size() << " parts of space " << spaceId;
         for (auto& partId : partIds) {
           bgWorkers_->addTask([spaceId, partId, enginePtr, &counter, &baton, this]() mutable {
-            auto part = newPart(spaceId, partId, enginePtr, false, {});
+            auto part = newPart(spaceId, partId, enginePtr, storageCache_.get(), false, {});
             LOG(INFO) << "Load part " << spaceId << ", " << partId << " from disk";
 
             {
@@ -347,8 +347,8 @@ void NebulaStore::addPart(GraphSpaceID spaceId,
 
   // Write the information into related engine.
   targetEngine->addPart(partId);
-  spaceIt->second->parts_.emplace(partId,
-                                  newPart(spaceId, partId, targetEngine.get(), asLearner, peers));
+  spaceIt->second->parts_.emplace(
+      partId, newPart(spaceId, partId, targetEngine.get(), storageCache_.get(), asLearner, peers));
   LOG(INFO) << "Space " << spaceId << ", part " << partId << " has been added, asLearner "
             << asLearner;
 }
@@ -356,6 +356,7 @@ void NebulaStore::addPart(GraphSpaceID spaceId,
 std::shared_ptr<Part> NebulaStore::newPart(GraphSpaceID spaceId,
                                            PartitionID partId,
                                            KVEngine* engine,
+                                           storage::StorageCache* storageCache,
                                            bool asLearner,
                                            const std::vector<HostAddr>& defaultPeers) {
   auto walPath = folly::stringPrintf("%s/wal/%d", engine->getWalRoot(), partId);
@@ -364,6 +365,7 @@ std::shared_ptr<Part> NebulaStore::newPart(GraphSpaceID spaceId,
                                      raftAddr_,
                                      walPath,
                                      engine,
+                                     storageCache,
                                      ioPool_,
                                      bgWorkers_,
                                      workers_,

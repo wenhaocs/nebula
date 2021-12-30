@@ -148,6 +148,8 @@ class NebulaKeyUtils final {
     return static_cast<NebulaKeyType>(type) == NebulaKeyType::kEdge;
   }
 
+  static bool isTagOrVertex(const folly::StringPiece& rawKey);
+
   static bool isLock(size_t vIdLen, const folly::StringPiece& rawKey) {
     return isEdge(vIdLen, rawKey, kLockVersion);
   }

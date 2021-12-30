@@ -122,8 +122,21 @@ class CacheLibLRU {
    * @param key
    */
   void invalidateItem(const std::string& key) {
+    std::unique_lock<std::shared_mutex> guard(lock_);
     nebulaCache_->remove(key);
-  }  // do we need to lock here?
+  }
+
+  /**
+   * @brief CacheLib remove items in batch
+   *
+   * @param keys
+   */
+  void invalidateItemsInBatch(const std::vector<std::string>& keys) {
+    std::unique_lock<std::shared_mutex> guard(lock_);
+    for (auto key : keys) {
+      nebulaCache_->remove(key);
+    }
+  }
 
   /**
    * @brief Get the configured size of the pool

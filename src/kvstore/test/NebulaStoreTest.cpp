@@ -49,6 +49,12 @@ std::shared_ptr<apache::thrift::concurrency::PriorityThreadManager> getHandlers(
   return handlersPool;
 }
 
+VertexID getStringId(int64_t vId) {
+  std::string id;
+  id.append(reinterpret_cast<const char*>(&vId), sizeof(int64_t));
+  return id;
+}
+
 TEST(NebulaStoreTest, SimpleTest) {
   auto partMan = std::make_unique<MemPartManager>();
   auto ioThreadPool = std::make_shared<folly::IOThreadPoolExecutor>(4);
@@ -991,7 +997,7 @@ TEST(NebulaStoreTest, BackupRestoreTest) {
 }
 
 // Test the effect of getting data with cache
-TEST(NebulaStoreTest, CacheAccessTest) {
+TEST(NebulaStoreTest, GetFillsCacheTest) {
   FLAGS_enable_storage_cache = true;
   FLAGS_enable_vertex_pool = true;
 
@@ -1061,6 +1067,95 @@ TEST(NebulaStoreTest, CacheAccessTest) {
       ret = store->storageCache_->getVertexProp(cacheKey, &value);
       EXPECT_TRUE(ret);
       EXPECT_TRUE(value == expectedRet);
+    }
+  }
+}
+
+// Test the cache after updating vertex
+TEST(NebulaStoreTest, CacheInvalidationTest) {
+  FLAGS_enable_storage_cache = true;
+  FLAGS_enable_vertex_pool = true;
+
+  GraphSpaceID spaceId = 0;
+  std::string prefix = "prefix";
+  fs::TempDir rootPath("/tmp/nebula_store_test.XXXXXX");
+
+  auto partMan = std::make_unique<MemPartManager>();
+  auto ioThreadPool = std::make_shared<folly::IOThreadPoolExecutor>(4);
+  for (auto partId = 0; partId < 6; partId++) {
+    partMan->partsMap_[spaceId][partId] = PartHosts();
+  }
+
+  VLOG(1) << "Total space num is " << partMan->partsMap_.size()
+          << ", total local partitions num is " << partMan->parts(HostAddr("", 0)).size();
+
+  std::vector<std::string> paths;
+  paths.emplace_back(folly::stringPrintf("%s/disk", rootPath.path()));
+
+  KVOptions options;
+  options.dataPaths_ = std::move(paths);
+  options.partMan_ = std::move(partMan);
+  HostAddr local = {"", 0};
+  auto store =
+      std::make_unique<NebulaStore>(std::move(options), ioThreadPool, local, getHandlers());
+  store->init();
+  sleep(1);
+
+  LOG(INFO) << "Put some data then read them...";
+  for (int part = 0; part < 3; part++) {
+    std::vector<KV> data;
+    for (int i = 0; i < 10; i++) {
+      auto key = NebulaKeyUtils::vertexKey(8, part, getStringId(i));
+      data.emplace_back(key, folly::stringPrintf("val_%d_%d", part, i));
+    }
+    {
+      folly::Baton<true, std::atomic> baton;
+      store->asyncMultiPut(0, part, std::move(data), [&baton](nebula::cpp2::ErrorCode code) {
+        EXPECT_EQ(nebula::cpp2::ErrorCode::SUCCEEDED, code);
+        baton.post();
+      });
+      baton.wait();
+    }
+
+    {
+      // after getting a key from kv store, cache will be filled first
+      int key_idx = 5;
+      std::string keyToFetch = NebulaKeyUtils::vertexKey(8, part, getStringId(key_idx));
+      auto cacheKey = NebulaKeyUtils::cacheKey(spaceId, keyToFetch);
+      std::string expectedRet = folly::stringPrintf("val_%d_%d", part, key_idx);
+      std::string value;
+
+      store->get(spaceId, part, keyToFetch, &value);
+      EXPECT_TRUE(value == expectedRet);
+
+      value.clear();
+      bool ret = store->storageCache_->getVertexProp(cacheKey, &value);
+      EXPECT_TRUE(ret);
+      EXPECT_TRUE(value == expectedRet);
+
+      // now update the value of this key
+      std::unique_ptr<kvstore::BatchHolder> batchHolder = std::make_unique<kvstore::BatchHolder>();
+
+      auto keyToDel = keyToFetch;
+      batchHolder->remove(std::move(keyToDel));
+      auto batch = encodeBatchValue(batchHolder->getBatch());
+
+      folly::Baton<true, std::atomic> baton;
+      store->asyncAppendBatch(0, part, std::move(batch), [&baton](nebula::cpp2::ErrorCode code) {
+        EXPECT_EQ(nebula::cpp2::ErrorCode::SUCCEEDED, code);
+        baton.post();
+      });
+      baton.wait();
+
+      // Now check the cache again. The key should be removed from the cache.
+      value.clear();
+      ret = store->storageCache_->getVertexProp(cacheKey, &value);
+      EXPECT_FALSE(ret);
+
+      // make sure the new value is written into DB
+      value.clear();
+      EXPECT_EQ(nebula::cpp2::ErrorCode::E_KEY_NOT_FOUND,
+                store->get(spaceId, part, keyToFetch, &value));
     }
   }
 }

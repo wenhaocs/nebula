@@ -45,7 +45,14 @@ class StorageCache {
   bool putVertexProp(const std::string& key, std::string& value);
 
   // evict a vertex in cache
-  void invalidateVertex(std::string& key);
+  void invalidateVertex(const std::string& key);
+
+  /**
+   * @brief Data may be written in batch. To avoid frequently aquiring and releasing locks, we will
+   * remove keys in batches in this case.
+   * @param keys: keys to remove from cache
+   */
+  void invalidateVerticesInBatch(const std::vector<std::string>& keys);
 
   // get the size of the vertex pool
   uint32_t getVertexPoolSize();

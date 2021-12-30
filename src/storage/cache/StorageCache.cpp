@@ -79,8 +79,14 @@ bool StorageCache::putVertexProp(const std::string& key, std::string& value) {
   return true;
 }
 
-void StorageCache::invalidateVertex(std::string& key) {
+void StorageCache::invalidateVertex(const std::string& key) {
+  VLOG(2) << "Invalidate vertex key: " << folly::hexlify(key);
   cacheInternal_->invalidateItem(key);
+}
+
+void StorageCache::invalidateVerticesInBatch(const std::vector<std::string>& keys) {
+  VLOG(2) << "Invalidate vertices batch size: " << keys.size();
+  cacheInternal_->invalidateItemsInBatch(keys);
 }
 
 uint32_t StorageCache::getVertexPoolSize() {
