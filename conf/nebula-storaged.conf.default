@@ -122,7 +122,7 @@
 --storage_cache_capacity=0
 # Number of buckets in base 2 logarithm. E.g., in case of 10, the total number of buckets will be 2^10.
 --storage_cache_buckets_power=10
-# Number of locks in base 2 logarithm. E.g., in case of 5, the total number of buckets will be 2^5.
+# Number of locks in base 2 logarithm. E.g., in case of 5, the total number of locks will be 2^5.
 --storage_cache_locks_power=5
 # Vertex pool size in MB
 --vertex_pool_capacity=50

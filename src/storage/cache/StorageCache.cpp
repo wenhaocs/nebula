@@ -17,7 +17,7 @@ DEFINE_uint32(storage_cache_buckets_power,
 DEFINE_uint32(storage_cache_locks_power,
               5,
               "Number of locks in base 2 logarithm. "
-              "E.g., in case of 5, the total number of buckets will be 2^5.");
+              "E.g., in case of 5, the total number of locks will be 2^5.");
 
 DEFINE_uint32(vertex_pool_capacity, 50, "Vertex pool size in MB");
 DEFINE_uint32(vertex_item_ttl, 300, "TTL for vertex item in the cache");
