@@ -75,6 +75,13 @@ class StorageCache {
   void invalidateVertex(std::string& key);
 
   /**
+   * @brief Data may be written in batch. To avoid frequently aquiring and releasing locks, we will
+   * remove keys in batches in this case.
+   * @param keys: keys to remove from cache
+   */
+  void invalidateVerticesInBatch(const std::vector<std::string>& keys);
+
+  /**
    * @brief get the size of the vertex pool
    *
    * @return uint32_t

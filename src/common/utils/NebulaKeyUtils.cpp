@@ -86,6 +86,18 @@ std::string NebulaKeyUtils::vertexKey(size_t vIdLen,
       .append(vIdLen - vId.size(), pad);
   return key;
 }
+
+// static
+bool NebulaKeyUtils::isTagOrVertex(const folly::StringPiece& rawKey) {
+  if (rawKey.size() < kTagLen) {
+    return false;
+  }
+  constexpr int32_t len = static_cast<int32_t>(sizeof(NebulaKeyType));
+  auto type = readInt<uint32_t>(rawKey.data(), len) & kTypeMask;
+  return (static_cast<NebulaKeyType>(type) == NebulaKeyType::kEdge) ||
+         (static_cast<NebulaKeyType>(type) == NebulaKeyType::kVertex);
+}
+
 // static
 std::string NebulaKeyUtils::systemCommitKey(PartitionID partId) {
   int32_t item = (partId << kPartitionOffset) | static_cast<uint32_t>(NebulaKeyType::kSystem);

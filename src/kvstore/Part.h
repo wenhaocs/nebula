@@ -13,6 +13,7 @@
 #include "kvstore/raftex/SnapshotManager.h"
 #include "kvstore/wal/FileBasedWal.h"
 #include "raftex/RaftPart.h"
+#include "storage/cache/StorageCache.h"
 
 namespace nebula {
 namespace kvstore {
@@ -28,6 +29,7 @@ class Part : public raftex::RaftPart {
        HostAddr localAddr,
        const std::string& walPath,
        KVEngine* engine,
+       storage::StorageCache* storageCache,
        std::shared_ptr<folly::IOThreadPoolExecutor> pool,
        std::shared_ptr<thread::GenericThreadPool> workers,
        std::shared_ptr<folly::Executor> handlers,
@@ -139,6 +141,7 @@ class Part : public raftex::RaftPart {
 
  private:
   KVEngine* engine_ = nullptr;
+  storage::StorageCache* storageCache_ = nullptr;
   int32_t vIdLen_;
 };
 
