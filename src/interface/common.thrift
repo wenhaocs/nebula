@@ -499,5 +499,12 @@ enum ErrorCode {
     E_RAFT_ATOMIC_OP_FAILED           = -3530,
     E_LEADER_LEASE_FAILED             = -3531,
 
+    // 4xxx for cache
+    E_CACHE_CONFIG_ERROR              = -4001,
+    E_NOT_ENOUGH_SPACE                = -4002,
+    E_CACHE_MISS                      = -4003,
+    E_POOL_NOT_FOUND                  = -4004,
+    E_CACHE_WRITE_FAILURE             = -4005,
+
     E_UNKNOWN                         = -8000,
 } (cpp.enum_strict)

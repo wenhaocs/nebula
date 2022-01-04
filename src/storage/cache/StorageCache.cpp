@@ -35,9 +35,8 @@ StorageCache::StorageCache() {
 
 bool StorageCache::init() {
   LOG(INFO) << "Start storage cache...";
-  auto status = cacheInternal_->initializeCache();
-  if (!status.ok()) {
-    LOG(ERROR) << status;
+  auto ret = cacheInternal_->initializeCache();
+  if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
     return false;
   }
   return true;
@@ -45,9 +44,8 @@ bool StorageCache::init() {
 
 bool StorageCache::createVertexPool(std::string poolName) {
   LOG(INFO) << "Create vertex pool: " << poolName;
-  auto status = cacheInternal_->addPool(poolName, FLAGS_vertex_pool_capacity);
-  if (!status.ok()) {
-    LOG(ERROR) << status;
+  auto ret = cacheInternal_->addPool(poolName, FLAGS_vertex_pool_capacity);
+  if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
     return false;
   }
   vertexPool_ = std::make_unique<VertexPoolInfo>(poolName, FLAGS_vertex_pool_capacity);
@@ -56,10 +54,10 @@ bool StorageCache::createVertexPool(std::string poolName) {
 
 bool StorageCache::getVertexProp(const std::string& key, std::string* value) {
   auto ret = cacheInternal_->get(key);
-  if (!ret.ok()) {
+  if (!nebula::ok(ret)) {
     return false;
   }
-  value->assign(std::move(ret).value());
+  value->assign(std::move(nebula::value(ret)));
   return true;
 }
 
@@ -72,8 +70,8 @@ bool StorageCache::putVertexProp(const std::string& key, std::string& value) {
     LOG(ERROR) << "No vertext pool exists!";
     return false;
   }
-  auto status = cacheInternal_->put(key, value, vertexPool_->poolName_, FLAGS_vertex_item_ttl);
-  if (!status.ok()) {
+  auto ret = cacheInternal_->put(key, value, vertexPool_->poolName_, FLAGS_vertex_item_ttl);
+  if (ret != nebula::cpp2::ErrorCode::SUCCEEDED) {
     return false;
   }
   return true;
@@ -85,11 +83,10 @@ void StorageCache::invalidateVertex(std::string& key) {
 
 uint32_t StorageCache::getVertexPoolSize() {
   auto ret = cacheInternal_->getConfiguredPoolSize(vertexPool_->poolName_);
-  if (!ret.ok()) {
-    LOG(ERROR) << ret.status();
+  if (!nebula::ok(ret)) {
     return 0;
   }
-  return ret.value() / 1024 / 1024;
+  return nebula::value(ret) / 1024 / 1024;
 }
 
 }  // namespace storage
