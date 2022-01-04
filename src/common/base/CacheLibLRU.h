@@ -9,8 +9,8 @@
 #include <cachelib/allocator/CacheAllocator.h>
 
 #include "common/base/Base.h"
-#include "common/base/Status.h"
-#include "common/base/StatusOr.h"
+#include "common/base/ErrorOr.h"
+#include "interface/gen-cpp2/common_types.h"
 
 namespace nebula {
 
@@ -28,9 +28,9 @@ class CacheLibLRU {
    * @brief Create cache instance. If there is any exception, we will allow the process continue.
    *
    * @param poolName: the pool to allocate cache space
-   * @return Status
+   * @return nebula::cpp2::ErrorCode
    */
-  Status initializeCache() {
+  nebula::cpp2::ErrorCode initializeCache() {
     Cache::Config config;
     try {
       config
@@ -42,11 +42,12 @@ class CacheLibLRU {
     } catch (const std::exception& e) {
       // We do not stop the service. Users should refer to the log to determine whether to restart
       // the service.
-      return Status::Error("Cache configuration error: %s", e.what());
+      LOG(ERROR) << "Cache configuration error: " << e.what();
+      return nebula::cpp2::ErrorCode::E_UNKNOWN;
     }
     nebulaCache_ = std::make_unique<Cache>(config);
 
-    return Status::OK();
+    return nebula::cpp2::ErrorCode::SUCCEEDED;
   }
 
   /**
@@ -54,35 +55,37 @@ class CacheLibLRU {
    *
    * @param poolName
    * @param poolSize
-   * @return Status
+   * @return nebula::cpp2::ErrorCode
    */
-  Status addPool(std::string poolName, uint32_t poolSize) {
+  nebula::cpp2::ErrorCode addPool(std::string poolName, uint32_t poolSize) {
     if (poolIdMap_.find(poolName) != poolIdMap_.end()) {
-      return Status::Error("Cache pool creation error. Cache pool exists: %s", poolName.data());
+      LOG(ERROR) << "Cache pool creation error. Cache pool exists: " << poolName.data();
+      return nebula::cpp2::ErrorCode::E_EXISTED;
     }
     try {
       auto poolId = nebulaCache_->addPool(poolName, poolSize * 1024 * 1024);
       poolIdMap_[poolName] = poolId;
     } catch (const std::exception& e) {
-      return Status::Error("Adding cache pool error: %s", e.what());
+      LOG(ERROR) << "Adding cache pool error: " << e.what();
+      return nebula::cpp2::ErrorCode::E_NOT_ENOUGH_SPACE;
     }
-    return Status::OK();
+    return nebula::cpp2::ErrorCode::SUCCEEDED;
   }
 
   /**
    * @brief Get key from cache. Return true if found.
    *
    * @param key
-   * @return Status error (cache miss) or value
+   * @return Error (cache miss) or value
    */
-  StatusOr<std::string> get(const std::string& key) {
-    std::shared_lock<std::shared_mutex> guard(lock_);
+  ErrorOr<nebula::cpp2::ErrorCode, std::string> get(const std::string& key) {
     auto itemHandle = nebulaCache_->find(key);
     if (itemHandle) {
       return std::string(reinterpret_cast<const char*>(itemHandle->getMemory()),
                          itemHandle->getSize());
     }
-    return Status::Error("Cache miss!");
+    VLOG(3) << "Cache miss: " << key << " Not Found";
+    return nebula::cpp2::ErrorCode::E_CACHE_MISS;
   }
 
   /**
@@ -92,18 +95,20 @@ class CacheLibLRU {
    * @param value
    * @param poolName: The pool name to insert/update cache item
    * @param ttl
-   * @return Status
+   * @return nebula::cpp2::ErrorCode
    */
-  Status put(const std::string& key,
-             const std::string& value,
-             std::string poolName,
-             uint32_t ttl = 300) {
+  nebula::cpp2::ErrorCode put(const std::string& key,
+                              const std::string& value,
+                              std::string poolName,
+                              uint32_t ttl = 300) {
     if (poolIdMap_.find(poolName) == poolIdMap_.end()) {
-      return Status::Error("Cache write error. Pool does not exists: %s", poolName.data());
+      LOG(ERROR) << "Cache write error. Pool does not exist: " << poolName.data();
+      return nebula::cpp2::ErrorCode::E_POOL_NOT_FOUND;
     }
     auto itemHandle = nebulaCache_->allocate(poolIdMap_[poolName], key, value.size(), ttl);
     if (!itemHandle) {
-      return Status::Error("Cache write error. Too many pending writes.");
+      LOG(ERROR) << "Cache write error. Too many pending writes.";
+      return nebula::cpp2::ErrorCode::E_CACHE_WRITE_FAILURE;
     }
 
     {
@@ -111,29 +116,33 @@ class CacheLibLRU {
       std::memcpy(itemHandle->getMemory(), value.data(), value.size());
       nebulaCache_->insertOrReplace(itemHandle);
     }
-    return Status::OK();
+    return nebula::cpp2::ErrorCode::SUCCEEDED;
   }
 
   /**
    * @brief CacheLib will first search for the key. If found, remove it.
    * Note here we do not log anything if not found, as it can have a good chance that an item is not
-   * in the cache due to ttl setting.
+   * in the cache.
    *
    * @param key
+   * @return nebula::cpp2::ErrorCode
    */
-  void invalidateItem(const std::string& key) {
+  nebula::cpp2::ErrorCode invalidateItem(const std::string& key) {
+    std::unique_lock<std::shared_mutex> guard(lock_);
     nebulaCache_->remove(key);
-  }  // do we need to lock here?
+    return nebula::cpp2::ErrorCode::SUCCEEDED;
+  }
 
   /**
    * @brief Get the configured size of the pool
    *
    * @param poolName
-   * @return Status error (pool not existing) or unit64_t
+   * @return Error (pool not existing) or unit64_t
    */
-  StatusOr<uint64_t> getConfiguredPoolSize(const std::string& poolName) {
+  ErrorOr<nebula::cpp2::ErrorCode, uint64_t> getConfiguredPoolSize(const std::string& poolName) {
     if (poolIdMap_.find(poolName) == poolIdMap_.end()) {
-      return Status::Error("Cache write error. Pool does not exists: %s", poolName.data());
+      LOG(ERROR) << "Get cache pool size error. Pool does not exist: " << poolName.data();
+      return nebula::cpp2::ErrorCode::E_POOL_NOT_FOUND;
     }
     return nebulaCache_->getPoolStats(poolIdMap_[poolName]).poolSize;
   }
@@ -142,17 +151,18 @@ class CacheLibLRU {
    * @brief Get the count of cache hit of a pool
    *
    * @param poolName
-   * @return Status error (pool not existing) or unit64_t
+   * @return Error (pool not existing) or unit64_t
    */
-  StatusOr<uint64_t> getPoolCacheHitCount(const std::string& poolName) {
+  ErrorOr<nebula::cpp2::ErrorCode, uint64_t> getPoolCacheHitCount(const std::string& poolName) {
     if (poolIdMap_.find(poolName) == poolIdMap_.end()) {
-      return Status::Error("Get cache hit count error. Pool does not exists: %s", poolName.data());
+      LOG(ERROR) << "Get cache hit count error. Pool does not exist: " << poolName.data();
+      return nebula::cpp2::ErrorCode::E_POOL_NOT_FOUND;
     }
     return nebulaCache_->getPoolStats(poolIdMap_[poolName]).numPoolGetHits;
   }
 
  private:
-  std::unique_ptr<Cache> nebulaCache_{nullptr};
+  std::unique_ptr<Cache> nebulaCache_ = nullptr;
   std::unordered_map<std::string, facebook::cachelib::PoolId> poolIdMap_;
   std::string name_;
   uint32_t capacity_ = 0;       // in MB

@@ -32,25 +32,60 @@ class StorageCache {
 
   bool init();
 
-  // create a vertex cache as pool
+  /**
+   * @brief create a vertex pool
+   *
+   * @param poolName
+   * @return
+   */
   bool createVertexPool(std::string poolName = kVertexPoolName);
 
-  // create a edge cache as pool
+  /**
+   * @brief create a edge pool
+   *
+   * @param key
+   * @param value
+   * @return
+   */
   bool createEdgePool(std::string& key, std::string* value);
 
-  // get vertex property via key
+  /**
+   * @brief get the property of a vertex
+   *
+   * @param key
+   * @param value: the property of a vertex
+   * @return
+   */
   bool getVertexProp(const std::string& key, std::string* value);
 
-  // insert or update vertex property in cache
+  /**
+   * @brief insert or update vertex property in cache
+   *
+   * @param key
+   * @param value
+   * @return
+   */
   bool putVertexProp(const std::string& key, std::string& value);
 
-  // evict a vertex in cache
+  /**
+   * @brief evict a vertex in cache
+   *
+   * @param key
+   */
   void invalidateVertex(std::string& key);
 
-  // get the size of the vertex pool
+  /**
+   * @brief get the size of the vertex pool
+   *
+   * @return uint32_t
+   */
   uint32_t getVertexPoolSize();
 
-  // check whether vertex pool exists
+  /**
+   * @brief check whether vertex pool exists
+   *
+   * @return bool
+   */
   bool vertexPoolExists() {
     return vertexPool_ != nullptr;
   }
