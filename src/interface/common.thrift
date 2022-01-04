@@ -473,12 +473,12 @@ enum ErrorCode {
     // get worker id
     E_WORKER_ID_FAILED                = -3062,
 
-    // 4xxx for cache
-    E_CACHE_CONFIG_ERROR              = -4001,
-    E_NOT_ENOUGH_SPACE                = -4002,
-    E_CACHE_MISS                      = -4003,
-    E_POOL_NOT_FOUND                  = -4004,
-    E_CACHE_WRITE_FAILURE             = -4005,
+    // 5xxx for cache
+    E_CACHE_CONFIG_ERROR              = -5001,
+    E_NOT_ENOUGH_SPACE                = -5002,
+    E_CACHE_MISS                      = -5003,
+    E_POOL_NOT_FOUND                  = -5004,
+    E_CACHE_WRITE_FAILURE             = -5005,
 
     E_UNKNOWN                         = -8000,
 } (cpp.enum_strict)
