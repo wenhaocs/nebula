@@ -54,7 +54,7 @@ bool NebulaStore::init() {
   // init cache
   bool ret;
   if (FLAGS_enable_storage_cache) {
-    storageCache_ = std::make_unique<storage::StorageCache>();
+    storageCache_ = std::make_unique<kvstore::StorageCache>();
     ret = storageCache_->init();
     if (!ret) {
       LOG(ERROR) << "nebula storage cache init failed";
@@ -356,7 +356,7 @@ void NebulaStore::addPart(GraphSpaceID spaceId,
 std::shared_ptr<Part> NebulaStore::newPart(GraphSpaceID spaceId,
                                            PartitionID partId,
                                            KVEngine* engine,
-                                           storage::StorageCache* storageCache,
+                                           kvstore::StorageCache* storageCache,
                                            bool asLearner,
                                            const std::vector<HostAddr>& defaultPeers) {
   auto walPath = folly::stringPrintf("%s/wal/%d", engine->getWalRoot(), partId);

@@ -21,9 +21,9 @@
 #include "kvstore/ListenerFactory.h"
 #include "kvstore/Part.h"
 #include "kvstore/PartManager.h"
+#include "kvstore/cache/StorageCache.h"
 #include "kvstore/raftex/RaftexService.h"
 #include "kvstore/raftex/SnapshotManager.h"
-#include "storage/cache/StorageCache.h"
 
 namespace nebula {
 namespace kvstore {
@@ -356,7 +356,7 @@ class NebulaStore : public KVStore, public Handler {
   std::shared_ptr<Part> newPart(GraphSpaceID spaceId,
                                 PartitionID partId,
                                 KVEngine* engine,
-                                storage::StorageCache* storageCache,
+                                kvstore::StorageCache* storageCache,
                                 bool asLearner,
                                 const std::vector<HostAddr>& defaultPeers);
 
@@ -409,7 +409,7 @@ class NebulaStore : public KVStore, public Handler {
   // We temporarily put storage cache as a member of nebula store.
   // Need to make both cache and nebula store as a composite class with refactor.
   // TODO: https://github.com/vesoft-inc/nebula/issues/3517
-  std::unique_ptr<storage::StorageCache> storageCache_{nullptr};
+  std::unique_ptr<kvstore::StorageCache> storageCache_{nullptr};
 };
 
 }  // namespace kvstore
