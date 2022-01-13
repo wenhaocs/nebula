@@ -59,10 +59,10 @@ nebula_add_executable(
         $<TARGET_OBJECTS:geo_index_obj>
         $<TARGET_OBJECTS:datetime_parser_obj>
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )

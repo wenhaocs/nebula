@@ -82,10 +82,10 @@ nebula_add_executable(
         ${common_deps}
         ${storage_meta_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
 )
 
@@ -106,10 +106,10 @@ nebula_add_executable(
         ${common_deps}
         ${storage_meta_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
 )
 
@@ -249,6 +249,7 @@ nebula_add_executable(
         ${storage_meta_deps}
         ${common_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
         ${THRIFT_LIBRARIES}

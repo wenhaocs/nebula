@@ -64,10 +64,10 @@ nebula_add_executable(
     OBJECTS
         ${perf_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         gtest
 )
 
@@ -88,10 +88,10 @@ nebula_add_executable(
     OBJECTS
         ${perf_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         gtest
 )
 

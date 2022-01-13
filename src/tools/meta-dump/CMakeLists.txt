@@ -61,10 +61,10 @@ nebula_add_executable(
         $<TARGET_OBJECTS:storage_thrift_obj>
         $<TARGET_OBJECTS:geo_index_obj>
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         glog
         gflags
 )

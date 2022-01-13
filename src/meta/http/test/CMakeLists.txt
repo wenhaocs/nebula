@@ -10,10 +10,10 @@ nebula_add_test(
     $<TARGET_OBJECTS:meta_http_handler>
     ${meta_test_deps}
   LIBRARIES
+    ${CACHELIB_LIBRARIES}
     ${ROCKSDB_LIBRARIES}
     ${THRIFT_LIBRARIES}
     ${PROXYGEN_LIBRARIES}
-    ${CACHELIB_LIBRARIES}
     wangle
     gtest
   )
@@ -26,10 +26,10 @@ nebula_add_test(
     $<TARGET_OBJECTS:meta_http_handler>
     ${meta_test_deps}
   LIBRARIES
+    ${CACHELIB_LIBRARIES}
     ${ROCKSDB_LIBRARIES}
     ${THRIFT_LIBRARIES}
     ${PROXYGEN_LIBRARIES}
-    ${CACHELIB_LIBRARIES}
     wangle
     gtest
   )

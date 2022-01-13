@@ -74,10 +74,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -90,10 +90,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -106,10 +106,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -122,10 +122,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -138,10 +138,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -154,10 +154,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -170,10 +170,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -186,10 +186,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -202,10 +202,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -218,10 +218,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -234,10 +234,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -250,10 +250,10 @@ nebula_add_executable(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         follybenchmark
         boost_regex
@@ -269,10 +269,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -285,10 +285,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -301,10 +301,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -317,10 +317,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -334,10 +334,10 @@ nebula_add_executable(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
         follybenchmark
@@ -352,10 +352,10 @@ nebula_add_executable(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -368,10 +368,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -386,10 +386,10 @@ nebula_add_executable(
         ${storage_test_deps}
         $<TARGET_OBJECTS:codec_test_obj>
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         follybenchmark
         boost_regex
@@ -405,10 +405,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -426,10 +426,10 @@ nebula_add_test(
         $<TARGET_OBJECTS:process_obj>
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -443,10 +443,10 @@ nebula_add_executable(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         follybenchmark
         wangle
         boost_regex
@@ -461,10 +461,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -479,10 +479,10 @@ nebula_add_test(
         $<TARGET_OBJECTS:ws_obj>
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -497,10 +497,10 @@ nebula_add_test(
         $<TARGET_OBJECTS:ws_obj>
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -515,10 +515,10 @@ nebula_add_test(
         $<TARGET_OBJECTS:ws_obj>
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -533,10 +533,10 @@ nebula_add_test(
         $<TARGET_OBJECTS:ws_obj>
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -549,10 +549,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -565,10 +565,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -581,10 +581,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -613,10 +613,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -629,10 +629,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -645,10 +645,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -666,10 +666,10 @@ nebula_add_test(
         $<TARGET_OBJECTS:ws_obj>
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -687,10 +687,10 @@ nebula_add_test(
         $<TARGET_OBJECTS:ws_obj>
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -724,10 +724,10 @@ nebula_add_executable(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -740,10 +740,10 @@ nebula_add_executable(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         follybenchmark
         boost_regex
@@ -757,10 +757,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -773,10 +773,10 @@ nebula_add_test(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         gtest
 )
 
@@ -788,10 +788,10 @@ nebula_add_executable(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -804,10 +804,10 @@ nebula_add_executable(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -820,10 +820,10 @@ nebula_add_executable(
     OBJECTS
         ${storage_test_deps}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         follybenchmark
         boost_regex
         wangle

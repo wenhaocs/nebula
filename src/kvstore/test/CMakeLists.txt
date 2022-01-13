@@ -53,10 +53,10 @@ nebula_add_test(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -69,10 +69,10 @@ nebula_add_test(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -85,10 +85,10 @@ nebula_add_test(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -101,10 +101,10 @@ nebula_add_test(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -117,10 +117,10 @@ nebula_add_test(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -133,10 +133,10 @@ nebula_add_test(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -149,10 +149,10 @@ nebula_add_test(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -165,10 +165,10 @@ nebula_add_test(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
@@ -181,10 +181,10 @@ nebula_add_executable(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         follybenchmark
         boost_regex
@@ -198,10 +198,10 @@ nebula_add_executable(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}  
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         follybenchmark
         gtest
@@ -216,10 +216,10 @@ nebula_add_test(
     OBJECTS
         ${KVSTORE_TEST_LIBS}
     LIBRARIES
+        ${CACHELIB_LIBRARIES}
         ${THRIFT_LIBRARIES}
         ${ROCKSDB_LIBRARIES}
         ${PROXYGEN_LIBRARIES}
-        ${CACHELIB_LIBRARIES}
         wangle
         gtest
 )
