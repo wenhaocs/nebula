@@ -129,19 +129,21 @@ class CacheLibLRU {
    */
   nebula::cpp2::ErrorCode invalidateItem(const std::string& key) {
     std::unique_lock<std::shared_mutex> guard(lock_);
+    VLOG(3) << "Invalidate vertex key: " << folly::hexlify(key);
     nebulaCache_->remove(key);
     return nebula::cpp2::ErrorCode::SUCCEEDED;
   }
 
   /**
-   * @brief CacheLib remove items in batch
+   * @brief CacheLib remove multiple items
    *
    * @param keys
    * @return nebula::cpp2::ErrorCode
    */
-  nebula::cpp2::ErrorCode invalidateItemsInBatch(const std::vector<std::string>& keys) {
+  nebula::cpp2::ErrorCode invalidateItems(const std::vector<std::string>& keys) {
     std::unique_lock<std::shared_mutex> guard(lock_);
     for (auto key : keys) {
+      VLOG(3) << "Invalidate vertex key: " << folly::hexlify(key);
       nebulaCache_->remove(key);
     }
     return nebula::cpp2::ErrorCode::SUCCEEDED;

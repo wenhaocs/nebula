@@ -356,7 +356,6 @@ class NebulaStore : public KVStore, public Handler {
   std::shared_ptr<Part> newPart(GraphSpaceID spaceId,
                                 PartitionID partId,
                                 KVEngine* engine,
-                                kvstore::StorageCache* storageCache,
                                 bool asLearner,
                                 const std::vector<HostAddr>& defaultPeers);
 

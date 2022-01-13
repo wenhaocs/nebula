@@ -238,6 +238,9 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
           LOG(ERROR) << idStr_ << "Failed to call WriteBatch::put()";
           return {code, kNoCommitLogId, kNoCommitLogTerm};
         }
+        if (storageCache_ && NebulaKeyUtils::isTagOrVertex(pieces[0])) {
+          keysToInvalidate.emplace_back(NebulaKeyUtils::cacheKey(spaceId_, pieces[0]));
+        }
         break;
       }
       case OP_MULTI_PUT: {
@@ -252,6 +255,9 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
             LOG(ERROR) << idStr_ << "Failed to call WriteBatch::put()";
             return {code, kNoCommitLogId, kNoCommitLogTerm};
           }
+          if (storageCache_ && NebulaKeyUtils::isTagOrVertex(kvs[i])) {
+            keysToInvalidate.emplace_back(NebulaKeyUtils::cacheKey(spaceId_, kvs[i]));
+          }
         }
         break;
       }
@@ -261,6 +267,9 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
         if (code != nebula::cpp2::ErrorCode::SUCCEEDED) {
           LOG(ERROR) << idStr_ << "Failed to call WriteBatch::remove()";
           return {code, kNoCommitLogId, kNoCommitLogTerm};
+        }
+        if (storageCache_ && NebulaKeyUtils::isTagOrVertex(key)) {
+          keysToInvalidate.emplace_back(NebulaKeyUtils::cacheKey(spaceId_, key));
         }
         break;
       }
@@ -365,7 +374,7 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
   if (code == nebula::cpp2::ErrorCode::SUCCEEDED) {
     // invalidate vertices in cache after the DB update, to avoid cache incoherence
     if (storageCache_ && keysToInvalidate.size()) {
-      this->storageCache_->invalidateVerticesInBatch(std::move(keysToInvalidate));
+      this->storageCache_->invalidateVertices(std::move(keysToInvalidate));
     }
     return {code, lastId, lastTerm};
   } else {

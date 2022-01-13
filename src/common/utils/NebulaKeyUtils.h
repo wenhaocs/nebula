@@ -256,7 +256,11 @@ class NebulaKeyUtils final {
   static EdgeVerPlaceHolder getLockVersion(const folly::StringPiece&) {
     return 0;
   }
-  // generate cache key from space id and the original key
+
+  /**
+   * @brief generate cache key from space id and the original key
+   * cache key = spaceId + key
+   */
   static std::string cacheKey(GraphSpaceID spaceId, const folly::StringPiece& key);
 
   static folly::StringPiece lockWithNoVersion(const folly::StringPiece& rawKey) {
