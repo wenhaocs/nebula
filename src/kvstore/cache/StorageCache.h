@@ -98,7 +98,7 @@ class StorageCache {
   }
 
   /**
-   * @brief add a key to invalide in cache
+   * @brief add a key to vector to invalidate in cache later
    *
    * @param spaceId:
    * @param rawKey: key like tag, vertix, edge, etc...
