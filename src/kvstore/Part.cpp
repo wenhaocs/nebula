@@ -217,7 +217,7 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
   auto batch = engine_->startBatchWrite();
   LogID lastId = kNoCommitLogId;
   TermID lastTerm = kNoCommitLogTerm;
-  std::vector<std::string> keysToInvalidate;
+  std::vector<std::string> verticesToInvalidate;
   while (iter->valid()) {
     lastId = iter->logId();
     lastTerm = iter->logTerm();
@@ -238,8 +238,8 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
           LOG(ERROR) << idStr_ << "Failed to call WriteBatch::put()";
           return {code, kNoCommitLogId, kNoCommitLogTerm};
         }
-        if (storageCache_ && NebulaKeyUtils::isTagOrVertex(pieces[0])) {
-          keysToInvalidate.emplace_back(NebulaKeyUtils::cacheKey(spaceId_, pieces[0]));
+        if (storageCache_) {
+          storageCache_->addCacheItemsToDelete(spaceId_, pieces[0], verticesToInvalidate);
         }
         break;
       }
@@ -255,8 +255,8 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
             LOG(ERROR) << idStr_ << "Failed to call WriteBatch::put()";
             return {code, kNoCommitLogId, kNoCommitLogTerm};
           }
-          if (storageCache_ && NebulaKeyUtils::isTagOrVertex(kvs[i])) {
-            keysToInvalidate.emplace_back(NebulaKeyUtils::cacheKey(spaceId_, kvs[i]));
+          if (storageCache_) {
+            storageCache_->addCacheItemsToDelete(spaceId_, kvs[i], verticesToInvalidate);
           }
         }
         break;
@@ -268,8 +268,8 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
           LOG(ERROR) << idStr_ << "Failed to call WriteBatch::remove()";
           return {code, kNoCommitLogId, kNoCommitLogTerm};
         }
-        if (storageCache_ && NebulaKeyUtils::isTagOrVertex(key)) {
-          keysToInvalidate.emplace_back(NebulaKeyUtils::cacheKey(spaceId_, key));
+        if (storageCache_) {
+          storageCache_->addCacheItemsToDelete(spaceId_, key, verticesToInvalidate);
         }
         break;
       }
@@ -282,8 +282,8 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
             LOG(ERROR) << idStr_ << "Failed to call WriteBatch::remove()";
             return {code, kNoCommitLogId, kNoCommitLogTerm};
           }
-          if (storageCache_ && NebulaKeyUtils::isTagOrVertex(k)) {
-            keysToInvalidate.emplace_back(NebulaKeyUtils::cacheKey(spaceId_, k));
+          if (storageCache_) {
+            storageCache_->addCacheItemsToDelete(spaceId_, k, verticesToInvalidate);
           }
         }
         break;
@@ -306,14 +306,14 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
           auto code = nebula::cpp2::ErrorCode::SUCCEEDED;
           if (op.first == BatchLogType::OP_BATCH_PUT) {
             code = batch->put(op.second.first, op.second.second);
-            if (storageCache_ && NebulaKeyUtils::isTagOrVertex(op.second.first)) {
-              keysToInvalidate.emplace_back(NebulaKeyUtils::cacheKey(spaceId_, op.second.first));
+            if (storageCache_) {
+              storageCache_->addCacheItemsToDelete(spaceId_, op.second.first, verticesToInvalidate);
             }
           } else if (op.first == BatchLogType::OP_BATCH_REMOVE) {
             // DeleteTags and DeleteVertices will reach here if indexes are not empty
             code = batch->remove(op.second.first);
-            if (storageCache_ && NebulaKeyUtils::isTagOrVertex(op.second.first)) {
-              keysToInvalidate.emplace_back(NebulaKeyUtils::cacheKey(spaceId_, op.second.first));
+            if (storageCache_) {
+              storageCache_->addCacheItemsToDelete(spaceId_, op.second.first, verticesToInvalidate);
             }
           } else if (op.first == BatchLogType::OP_BATCH_REMOVE_RANGE) {
             code = batch->removeRange(op.second.first, op.second.second);
@@ -373,8 +373,10 @@ std::tuple<nebula::cpp2::ErrorCode, LogID, TermID> Part::commitLogs(
       std::move(batch), FLAGS_rocksdb_disable_wal, FLAGS_rocksdb_wal_sync, wait);
   if (code == nebula::cpp2::ErrorCode::SUCCEEDED) {
     // invalidate vertices in cache after the DB update, to avoid cache incoherence
-    if (storageCache_ && keysToInvalidate.size()) {
-      this->storageCache_->invalidateVertices(std::move(keysToInvalidate));
+    if (storageCache_) {
+      if (verticesToInvalidate.size()) {
+        storageCache_->invalidateVertices(std::move(verticesToInvalidate));
+      }
     }
     return {code, lastId, lastTerm};
   } else {

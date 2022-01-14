@@ -29,8 +29,8 @@ DECLARE_bool(rocksdb_disable_wal);
 DECLARE_int32(rocksdb_backup_interval_secs);
 DECLARE_int32(wal_ttl);
 
-DEFINE_bool(enable_storage_cache, false, "Whether to enable storage cache");
-DEFINE_bool(enable_vertex_pool, false, "Whether to add vertex pool in cache");
+DECLARE_bool(enable_storage_cache);
+DECLARE_bool(enable_vertex_pool);
 
 namespace nebula {
 namespace kvstore {

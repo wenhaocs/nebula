@@ -97,6 +97,17 @@ class StorageCache {
     return vertexPool_ != nullptr;
   }
 
+  /**
+   * @brief add a key to invalide in cache
+   *
+   * @param spaceId:
+   * @param rawKey: key like tag, vertix, edge, etc...
+   * @param vertixKeys: a vector storing the cacheKey to invalidate
+   */
+  void addCacheItemsToDelete(GraphSpaceID spaceId,
+                             const folly::StringPiece& rawKey,
+                             std::vector<std::string>& vertexKeys);
+
  private:
   uint32_t capacity_ = 0;  // in MB
   std::unique_ptr<CacheLibLRU> cacheInternal_{nullptr};

@@ -94,7 +94,7 @@ bool NebulaKeyUtils::isTagOrVertex(const folly::StringPiece& rawKey) {
   }
   constexpr int32_t len = static_cast<int32_t>(sizeof(NebulaKeyType));
   auto type = readInt<uint32_t>(rawKey.data(), len) & kTypeMask;
-  return (static_cast<NebulaKeyType>(type) == NebulaKeyType::kEdge) ||
+  return (static_cast<NebulaKeyType>(type) == NebulaKeyType::kTag_) ||
          (static_cast<NebulaKeyType>(type) == NebulaKeyType::kVertex);
 }
 

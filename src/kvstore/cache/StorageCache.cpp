@@ -5,6 +5,8 @@
 
 #include "kvstore/cache/StorageCache.h"
 
+#include "common/utils/NebulaKeyUtils.h"
+
 DEFINE_uint32(storage_cache_capacity,
               100,
               "Total capacity reservered for storage in memory cache in MB");
@@ -21,6 +23,9 @@ DEFINE_uint32(storage_cache_locks_power,
 
 DEFINE_uint32(vertex_pool_capacity, 50, "Vertex pool size in MB");
 DEFINE_uint32(vertex_item_ttl, 300, "TTL for vertex item in the cache");
+
+DEFINE_bool(enable_storage_cache, false, "Whether to enable storage cache");
+DEFINE_bool(enable_vertex_pool, false, "Whether to add vertex pool in cache");
 
 namespace nebula {
 namespace kvstore {
@@ -91,6 +96,14 @@ uint32_t StorageCache::getVertexPoolSize() {
     return 0;
   }
   return nebula::value(ret) / 1024 / 1024;
+}
+
+void StorageCache::addCacheItemsToDelete(GraphSpaceID spaceId,
+                                         const folly::StringPiece& rawKey,
+                                         std::vector<std::string>& vertexKeys) {
+  if (FLAGS_enable_vertex_pool && NebulaKeyUtils::isTagOrVertex(rawKey)) {
+    vertexKeys.emplace_back(NebulaKeyUtils::cacheKey(spaceId, rawKey));
+  }
 }
 
 }  // namespace kvstore
