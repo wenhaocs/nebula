@@ -119,10 +119,10 @@
 # Total capacity reserved for storage in memory cache in MB
 --storage_cache_capacity=0
 # Number of buckets in base 2 logarithm. E.g., in case of 20, the total number of buckets will be 2^20. 
-# For optimal performance, this value should be set to ceil(log2(cache_entries * 1.6)). The maximum allowed is 32.
+# For optimal performance, an estimated value can be ceil(log2(cache_entries * 1.6)). The maximum allowed is 32.
 --storage_cache_buckets_power=20
 # Number of locks in base 2 logarithm. E.g., in case of 10, the total number of locks will be 2^10. 
-# For optimal performance, this value should be set to max(1, buckets_power - 10). The maximum allowed is 32.
+# For optimal performance, an estimated value can be max(1, buckets_power - 10). The maximum allowed is 32.
 --storage_cache_locks_power=10
 
 # Whether to add vertex pool in cache. Only valid when storage cache is enabled.
