@@ -22,7 +22,7 @@ std::unique_ptr<Graph> IsomorExecutor::generateGraph(Iterator* vIter, Iterator* 
   // 1 2
   // 2 3
   // 3 0
-  // To store the degree of each vertex
+  // To store the out degree of each vertex
   // degree[0] = 2
   // degree[1] = 2
   // degree[2] = 2
@@ -46,19 +46,18 @@ std::unique_ptr<Graph> IsomorExecutor::generateGraph(Iterator* vIter, Iterator* 
 
   unsigned int* labels = new unsigned int[lCount];
 
-  // load data vertices id and tags
+  // load data vertices id and label
   while (vIter->valid()) {
     const auto vertex = vIter->getColumn(nebula::kVid);  // check if v is a vertex
     auto vId = vertex.getInt();
     const auto label = vIter->getColumn(nebula::graph::kDefaultProp);  // get label by index
     auto lId = label.getInt();
-    // unsigned int v_id = (unsigned int)v.getInt(0);
-    labels[vId] = lId;  // Tag Id
+    labels[vId] = lId;
     vIter->next();
   }
 
   auto eIterCopy = eIter->copy();
-  // load edges degree
+  // calculate out degree
   while (eIter->valid()) {
     auto s = eIter->getEdgeProp("*", kSrc);
     auto src = s.getInt();
@@ -95,8 +94,6 @@ std::unique_ptr<Graph> IsomorExecutor::generateGraph(Iterator* vIter, Iterator* 
 }
 
 folly::Future<Status> IsomorExecutor::execute() {
-  // TODO: Replace the following codes with subgraph matching. Return type.
-  // Define 2:
   SCOPED_TIMER(&execTime_);
   auto* isomor = asNode<Isomor>(node());
   DataSet ds;
