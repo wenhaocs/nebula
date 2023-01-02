@@ -18,13 +18,13 @@ static const char kDefaultProp[] = "default";  //
 StatusOr<SubPlan> IsomorPlanner::transform(AstContext* astCtx) {
   isoCtx_ = static_cast<IsomorContext*>(astCtx);
   auto qctx = isoCtx_->qctx;
-  auto dSpace = isoCtx_->dataSpace;
+  auto dSpaceId = isoCtx_->dataSpace;
   auto qSpaceId = isoCtx_->querySpace;
 
-  auto dScanVertics = createScanVerticesPlan(qctx, dSpace, nullptr);
+  auto dScanVertics = createScanVerticesPlan(qctx, dSpaceId, nullptr);
   auto qScanVertics = createScanVerticesPlan(qctx, qSpaceId, dScanVertics);
 
-  auto dScanEdges = createScanEdgesPlan(qctx, dSpace, qScanVertics);
+  auto dScanEdges = createScanEdgesPlan(qctx, dSpaceId, qScanVertics);
   auto qScanEdges = createScanEdgesPlan(qctx, qSpaceId, dScanEdges);
 
   auto isomor = Isomor::make(qctx,
@@ -32,7 +32,7 @@ StatusOr<SubPlan> IsomorPlanner::transform(AstContext* astCtx) {
                              dScanVertics->outputVar(),
                              qScanVertics->outputVar(),
                              dScanEdges->outputVar(),
-                             dScanEdges->outputVar());
+                             qScanEdges->outputVar());
 
   SubPlan subPlan;
   subPlan.root = isomor;
