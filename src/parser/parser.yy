@@ -12,7 +12,7 @@
 %parse-param { std::string &errmsg }
 %parse-param { nebula::Sentence** sentences }
 %parse-param { nebula::graph::QueryContext* qctx }
-  
+
 %code requires {
 #include <iostream>
 #include <sstream>
@@ -1392,9 +1392,9 @@ truncate_clause
 
 go_sentence
     : KW_GO step_clause from_clause over_clause where_clause yield_clause truncate_clause {
-        auto go = new GoSentence($2, $3, $4, $5, $7);  
-        go->setYieldClause($6);  
-        $$ = go;  
+        auto go = new GoSentence($2, $3, $4, $5, $7);
+        go->setYieldClause($6);
+        $$ = go;
     }
     ;
  
@@ -1418,18 +1418,18 @@ step_clause
     ;
 
 from_clause  
-    : KW_FROM vid_list {  
-        $$ = new FromClause($2);  
-    }    
-    | KW_FROM vid_ref_expression { 
-        if(graph::ExpressionUtils::findAny($2,{Expression::Kind::kVar})) { 
-            throw nebula::GraphParser::syntax_error(@2, "Parameter is not supported in from clause"); 
-        } 
-        $$ = new FromClause($2); 
-    } 
-    ; 
+    : KW_FROM vid_list {
+        $$ = new FromClause($2);
+    }
+    | KW_FROM vid_ref_expression {
+        if(graph::ExpressionUtils::findAny($2,{Expression::Kind::kVar})) {
+            throw nebula::GraphParser::syntax_error(@2, "Parameter is not supported in from clause");
+        }
+        $$ = new FromClause($2);
+    }
+    ;
 
-vid_list 
+vid_list
     : vid {
         $$ = new VertexIDList();
         $$->add($1);
@@ -1466,9 +1466,9 @@ vid
             throw nebula::GraphParser::syntax_error(@1, "Variable is not supported in vid");
         }
     }
-    ;    
-              
-unary_integer 
+    ;
+  
+unary_integer
     : PLUS legal_integer {
         $$ = $2;
     }
@@ -1479,7 +1479,7 @@ unary_integer
         $$ = $1;
     }
     ;
- 
+
 vid_ref_expression
     : input_prop_expression {
         $$ = $1;
@@ -1491,7 +1491,7 @@ vid_ref_expression
         $$ = $1;
     }
     ;
- 
+
 over_edge
     : name_label {
         $$ = new OverEdge($1);
@@ -1702,9 +1702,6 @@ match_clause
     }
     ;
 
-
-
-
 reading_clause
     : unwind_clause {
         $$ = $1;
@@ -1796,13 +1793,13 @@ match_path
         $$ = $3;
         $$->setAlias($1);
     }
-    ; 
+    ;
 
 match_path_list
     : match_path {
       $$ = new MatchPathList($1);
     }
-    | match_path_list COMMA match_path { 
+    | match_path_list COMMA match_path {
       $$ = $1;
       $$->add($3);
     }

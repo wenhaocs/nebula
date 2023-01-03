@@ -38,10 +38,9 @@ class ParserIso : public ::testing::Test {
 TEST_F(ParserIso, TestSchemaCreation) {
   // All type
   {
-    std::string query =
-        "ISOMOR A.graph,b.graph";
+    std::string query = "ISOMOR A, B";
     auto result = parse(query);
-    //  ASSERT_TRUE(result.ok()) << result.status();
+    ASSERT_TRUE(result.ok()) << result.status();
   }
 }
 /*
