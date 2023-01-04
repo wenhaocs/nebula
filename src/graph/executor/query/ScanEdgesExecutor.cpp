@@ -15,6 +15,7 @@ namespace nebula {
 namespace graph {
 
 folly::Future<Status> ScanEdgesExecutor::execute() {
+  LOG(INFO) << "In scanedges executor";
   return scanEdges();
 }
 
@@ -22,11 +23,11 @@ folly::Future<Status> ScanEdgesExecutor::scanEdges() {
   SCOPED_TIMER(&execTime_);
   StorageClient *client = qctx()->getStorageClient();
   auto *se = asNode<ScanEdges>(node());
-  if (se->limit() < 0) {
-    return Status::Error(
-        "Scan vertices or edges need to specify a limit number, "
-        "or limit number can not push down.");
-  }
+  // if (se->limit() < 0) {
+  //   return Status::Error(
+  //       "Scan vertices or edges need to specify a limit number, "
+  //       "or limit number can not push down.");
+  // }
 
   time::Duration scanEdgesTime;
   StorageClient::CommonRequestParam param(se->space(),

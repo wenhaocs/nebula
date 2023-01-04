@@ -15,6 +15,8 @@ std::unique_ptr<Graph> IsomorExecutor::generateGraph(Iterator* vIter, Iterator* 
   uint32_t lCount = vIter->size();
   uint32_t eCount = eIter->size();
 
+  LOG(INFO) << "vCound: " << vCount << " lCount: " << lCount << " eCount: " << eCount;
+
   // Example:
   // Vetices 3: 0, 1, 2, 3
   // Edges:
@@ -94,6 +96,7 @@ std::unique_ptr<Graph> IsomorExecutor::generateGraph(Iterator* vIter, Iterator* 
 }
 
 folly::Future<Status> IsomorExecutor::execute() {
+  LOG(INFO) << "In Isomor executor";
   SCOPED_TIMER(&execTime_);
   auto* isomor = asNode<Isomor>(node());
   DataSet ds;
@@ -103,7 +106,10 @@ folly::Future<Status> IsomorExecutor::execute() {
   auto iterDE = ectx_->getResult(isomor->getdScanEOut()).iter();
   auto iterQE = ectx_->getResult(isomor->getqScanEOut()).iter();
 
-  auto dataGraph = generateGraph(iterDV.get(), iterDE.get());
+  LOG(INFO) << "iter dv: " << iterDV->size() << " iterQV: " << iterQV->size();
+
+  auto dataGraph =
+      generateGraph(static_cast<PropIter*>(iterDV.get()), static_cast<PropIter*>(iterDE.get()));
   auto queryGraph = generateGraph(iterQV.get(), iterQE.get());
 
   ui** candidates = nullptr;

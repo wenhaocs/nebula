@@ -20,9 +20,16 @@ Status IsomorValidator::validateImpl() {
 Status IsomorValidator::validateTag(const NameLabelList *nameLabels) {
   auto graphs = nameLabels->labels();
 
+  LOG(INFO) << "query space name: " << *graphs[0];
+  LOG(INFO) << "data space name: " << *graphs[1];
   // The first graph is query graph and the second graph is the data graph
-  fetchCtx_->querySpace = qctx_->schemaMng()->toGraphSpaceID(*graphs[0]);
-  fetchCtx_->dataSpace = qctx_->schemaMng()->toGraphSpaceID(*graphs[1]);
+  auto querySpaceRet = qctx_->schemaMng()->toGraphSpaceID(*graphs[0]);
+  NG_RETURN_IF_ERROR(querySpaceRet);
+  auto dataSpaceRet = qctx_->schemaMng()->toGraphSpaceID(*graphs[1]);
+  NG_RETURN_IF_ERROR(dataSpaceRet);
+
+  fetchCtx_->querySpace = querySpaceRet.value();
+  fetchCtx_->dataSpace = dataSpaceRet.value();
   return Status::OK();
 }
 }  // namespace graph
