@@ -11,9 +11,8 @@
 namespace nebula {
 namespace graph {
 
-static const TagID kDefaultTag = 1;          // what's the id of first tag?
-static const EdgeType kDefaultEdgeType = 1;  // what's the id of first edge type?
-static const char kDefaultProp[] = "label";  //
+static const char kDefaultProp[] = "label";
+static const char koutputCol[] = "count";
 
 StatusOr<SubPlan> IsomorPlanner::transform(AstContext* astCtx) {
   isoCtx_ = static_cast<IsomorContext*>(astCtx);
@@ -28,15 +27,25 @@ StatusOr<SubPlan> IsomorPlanner::transform(AstContext* astCtx) {
   auto qScanEdges = createScanEdgesPlan(qctx, qSpaceId, dScanEdges);
 
   auto isomor = Isomor::make(qctx,
-                             qScanEdges,
                              dScanVertics->outputVar(),
                              qScanVertics->outputVar(),
                              dScanEdges->outputVar(),
                              qScanEdges->outputVar());
+  isomor->addDep(dScanVertics);
+  isomor->addDep(qScanVertics);
+  isomor->addDep(dScanEdges);
+  isomor->addDep(qScanEdges);
+
+  isomor->setInputVars({dScanVertics->outputVar(),
+                        qScanVertics->outputVar(),
+                        dScanEdges->outputVar(),
+                        qScanEdges->outputVar()});
+
+  isomor->setColNames({koutputCol});
 
   SubPlan subPlan;
   subPlan.root = isomor;
-  subPlan.tail = dScanVertics;
+  subPlan.tail = qScanEdges;
   return subPlan;
 }
 
@@ -48,12 +57,13 @@ PlanNode* IsomorPlanner::createScanVerticesPlan(QueryContext* qctx,
   DCHECK(tags.ok());
 
   std::string tagName;
+  TagID tagId;
   for (auto tag : tags.value()) {
-    auto tagId = tag.first;
+    tagId = tag.first;
     auto tagNameRet = qctx->schemaMng()->toTagName(spaceId, tagId);
     DCHECK(tagNameRet.ok());
     tagName = std::move(tagNameRet.value());
-    LOG(INFO) << "spaceId: " << spaceId << " tag id: " << tagId << " tag name: " << tagName;
+    // LOG(INFO) << "spaceId: " << spaceId << " tag id: " << tagId << " tag name: " << tagName;
   }
 
   auto vProps = std::make_unique<std::vector<storage::cpp2::VertexProp>>();
@@ -61,7 +71,7 @@ PlanNode* IsomorPlanner::createScanVerticesPlan(QueryContext* qctx,
 
   storage::cpp2::VertexProp vProp;
   std::vector<std::string> props{kDefaultProp};
-  vProp.tag_ref() = kDefaultTag;
+  vProp.tag_ref() = tagId;
   vProp.props_ref() = std::move(props);
   vProps->emplace_back(std::move(vProp));
   colNames.emplace_back(tagName + "." + std::string(kDefaultProp));
@@ -81,12 +91,13 @@ PlanNode* IsomorPlanner::createScanEdgesPlan(QueryContext* qctx,
   DCHECK(edges.ok());
 
   std::string edgeName;
+  EdgeType edgeType;
   for (auto edge : edges.value()) {
-    auto edgeType = edge.first;
+    edgeType = edge.first;
     auto edgeNameRet = qctx->schemaMng()->toEdgeName(spaceId, edgeType);
     DCHECK(edgeNameRet.ok());
     edgeName = std::move(edgeNameRet.value());
-    LOG(INFO) << "edge type: " << edgeType << "edge name: " << edgeName;
+    // LOG(INFO) << "edge type: " << edgeType << "edge name: " << edgeName;
   }
 
   auto eProps = std::make_unique<std::vector<storage::cpp2::EdgeProp>>();
@@ -100,7 +111,7 @@ PlanNode* IsomorPlanner::createScanEdgesPlan(QueryContext* qctx,
     colNames.emplace_back(edgeName + "." + prop);
   }
 
-  eProp.type_ref() = kDefaultEdgeType;
+  eProp.type_ref() = edgeType;
   eProp.props_ref() = std::move(props);
   eProps->emplace_back(std::move(eProp));
 

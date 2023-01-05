@@ -2443,15 +2443,16 @@ void CheckRepartiton2(Graph *&query_graph,
     }
   }
 }
-bool CECIFunction(Graph *data_graph,
-                  Graph *query_graph,
-                  ui **&candidates,
-                  ui *&candidates_count,
-                  ui *&order,
-                  ui *&provenance,
-                  TreeNode *&tree,
-                  std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> &P_Candidates,
-                  std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> &P_Provenance) {
+
+int64_t CECIFunction(Graph *data_graph,
+                     Graph *query_graph,
+                     ui **&candidates,
+                     ui *&candidates_count,
+                     ui *&order,
+                     ui *&provenance,
+                     TreeNode *&tree,
+                     std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> &P_Candidates,
+                     std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> &P_Provenance) {
   // std::cout <<"Initialize function: " << std::endl;
   //   Initial the CECI Index.
   //   In this case,
@@ -4525,7 +4526,7 @@ std::cout <<i << std::endl;
 
   // fclose(stdout);
 
-  return true;
+  return total_result;
   // NTE Tree:
 }
 //

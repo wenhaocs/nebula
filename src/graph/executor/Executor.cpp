@@ -718,6 +718,7 @@ Status Executor::finish(Result &&result) {
     numRows_ = result.size();
     result.checkMemory(node()->isQueryNode());
     ectx_->setResult(node()->outputVar(), std::move(result));
+    LOG(INFO) << "writing result to: " << node()->outputVar();
   } else {
     VLOG(1) << "Drop variable " << node()->outputVar();
   }

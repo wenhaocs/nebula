@@ -108,8 +108,7 @@ folly::Future<Status> IsomorExecutor::execute() {
 
   LOG(INFO) << "iter dv: " << iterDV->size() << " iterQV: " << iterQV->size();
 
-  auto dataGraph =
-      generateGraph(static_cast<PropIter*>(iterDV.get()), static_cast<PropIter*>(iterDE.get()));
+  auto dataGraph = generateGraph(iterDV.get(), iterDE.get());
   auto queryGraph = generateGraph(iterQV.get(), iterQE.get());
 
   ui** candidates = nullptr;
@@ -124,7 +123,7 @@ folly::Future<Status> IsomorExecutor::execute() {
   std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> P_Provenance;
   // std::cout"Provenance Function: " << std::endl:endl;
 
-  bool result = CECIFunction(dataGraph.get(),
+  auto result = CECIFunction(dataGraph.get(),
                              queryGraph.get(),
                              candidates,
                              candidates_count,
@@ -134,6 +133,8 @@ folly::Future<Status> IsomorExecutor::execute() {
                              P_Candidates,
                              P_Provenance);
 
+  ds.emplace_back(nebula::Row({result}));
+
   delete[] ceci_order;
   delete[] provenance;
   delete[] candidates_count;
@@ -141,7 +142,9 @@ folly::Future<Status> IsomorExecutor::execute() {
   delete ceci_tree;
 
   // Set result in the ds and set the new column name for the (isomor matching 's) result.
-  return finish(ResultBuilder().value(Value(std::move(result))).build());
+  auto status = finish(ResultBuilder().value(std::move(ds)).build());
+
+  return status;
 }
 }  // namespace graph
 }  // namespace nebula

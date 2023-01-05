@@ -328,17 +328,23 @@ class BiCartesianProduct final : public BinaryInputNode {
   explicit BiCartesianProduct(QueryContext* qctx);
 };
 
-class Isomor final : public SingleInputNode {
+class Isomor final : public VariableDependencyNode {
  public:
   static Isomor* make(QueryContext* qctx,
-                      PlanNode* input,
                       const std::string& dScanVOut,
                       const std::string& qScanVOut,
                       const std::string& dScanEOut,
                       const std::string& qScanEOut) {
-    return qctx->objPool()->makeAndAdd<Isomor>(
-        qctx, input, dScanVOut, qScanVOut, dScanEOut, qScanEOut);
+    return qctx->objPool()->makeAndAdd<Isomor>(qctx, dScanVOut, qScanVOut, dScanEOut, qScanEOut);
   }
+
+  void setInputVars(const std::vector<std::string>& vars) {
+    inputVars_.clear();
+    for (auto& var : vars) {
+      readVariable(var);
+    }
+  }
+
   const std::string& getdScanVOut() const {
     return dScanVOut_;
   }
@@ -355,12 +361,11 @@ class Isomor final : public SingleInputNode {
  private:
   friend ObjectPool;
   Isomor(QueryContext* qctx,
-         PlanNode* input,
          const std::string& dScanVOut,
          const std::string& qScanVOut,
          const std::string& dScanEOut,
          const std::string& qScanEOut)
-      : SingleInputNode(qctx, Kind::kIsomor, input),
+      : VariableDependencyNode(qctx, Kind::kIsomor),
         dScanVOut_(dScanVOut),
         qScanVOut_(qScanVOut),
         dScanEOut_(dScanEOut),
