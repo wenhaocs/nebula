@@ -86,7 +86,7 @@ void Graph::loadGraphFromExecutor(unsigned int v_c,
     this->offsets[i] = off[i];
   }
 
-  for (ui i = 0; i < e_c; ++i) {
+  for (ui i = 0; i < e_c * 2; ++i) {
     this->neighbors[i] = nei[i];
   }
 

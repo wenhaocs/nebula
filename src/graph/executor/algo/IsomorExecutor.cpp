@@ -85,9 +85,10 @@ StatusOr<std::unique_ptr<Graph>> IsomorExecutor::generateGraph(PropIter* vIter,
   auto eIterCopy = eIter->copy();
   // calculate out degree
   while (eIter->valid()) {
-    auto s = eIter->getEdgeProp("*", kSrc);
-    auto src = s.getInt();  // vid starts from 0
-    degree[src]++;
+    auto srcId = eIter->getEdgeProp("*", kSrc).getInt();
+    auto dstId = eIter->getEdgeProp("*", kDst).getInt();
+    degree[srcId]++;
+    degree[dstId]++;
     eIter->next();
   }
 
@@ -105,7 +106,9 @@ StatusOr<std::unique_ptr<Graph>> IsomorExecutor::generateGraph(PropIter* vIter,
     unsigned int dst = eIterCopy->getEdgeProp("*", kDst).getInt();
 
     neighbors[offsetCurr[src]] = dst;
+    neighbors[offsetCurr[dst]] = src;
     offsetCurr[src]++;
+    offsetCurr[dst]++;
     eIterCopy->next();
   }
 
@@ -133,51 +136,51 @@ folly::Future<Status> IsomorExecutor::execute() {
   LOG(INFO) << "iter dv: " << iterDV->size() << " iterQV: " << iterQV->size();
   LOG(INFO) << "iter de: " << iterDE->size() << " iterQE: " << iterQE->size();
 
-  // auto dataGraphRet = generateGraph(static_cast<PropIter*>(iterDV.get()),
-  //                                   static_cast<PropIter*>(iterDE.get()),
-  //                                   isomor->getLabel());
+  auto dataGraphRet = generateGraph(static_cast<PropIter*>(iterDV.get()),
+                                    static_cast<PropIter*>(iterDE.get()),
+                                    isomor->getLabel());
   auto queryGraphRet = generateGraph(static_cast<PropIter*>(iterQV.get()),
                                      static_cast<PropIter*>(iterQE.get()),
                                      isomor->getLabel());
 
-  // if (!dataGraphRet.ok() || !queryGraphRet.ok()) {
-  //   return Status::Error("Generating graph error!");
-  // }
+  if (!dataGraphRet.ok() || !queryGraphRet.ok()) {
+    return Status::Error("Generating graph error!");
+  }
 
-  // auto dataGraph = std::move(dataGraphRet).value();
+  auto dataGraph = std::move(dataGraphRet).value();
   auto queryGraph = std::move(queryGraphRet).value();
 
   // dataGraph->printGraph();
-  queryGraph->printGraph();
+  // queryGraph->printGraph();
 
-  // ui** candidates = nullptr;
-  // ui* candidates_count = nullptr;
+  ui** candidates = nullptr;
+  ui* candidates_count = nullptr;
 
-  // TreeNode* ceci_tree = nullptr;
-  // ui* ceci_order = nullptr;
-  // ui* provenance = nullptr;
+  TreeNode* ceci_tree = nullptr;
+  ui* ceci_order = nullptr;
+  ui* provenance = nullptr;
 
-  // //  Parent, first branch, second branch.
-  // std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> P_Candidates;
-  // std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> P_Provenance;
+  //  Parent, first branch, second branch.
+  std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> P_Candidates;
+  std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> P_Provenance;
 
-  // auto result = CECIFunction(dataGraph.get(),
-  //                            queryGraph.get(),
-  //                            candidates,
-  //                            candidates_count,
-  //                            ceci_order,
-  //                            provenance,
-  //                            ceci_tree,
-  //                            P_Candidates,
-  //                            P_Provenance);
+  auto result = CECIFunction(dataGraph.get(),
+                             queryGraph.get(),
+                             candidates,
+                             candidates_count,
+                             ceci_order,
+                             provenance,
+                             ceci_tree,
+                             P_Candidates,
+                             P_Provenance);
 
-  // ds.emplace_back(nebula::Row({result}));
+  ds.emplace_back(nebula::Row({result}));
 
-  // delete[] ceci_order;
-  // delete[] provenance;
-  // delete[] candidates_count;
-  // delete[] candidates;
-  // delete ceci_tree;
+  delete[] ceci_order;
+  delete[] provenance;
+  delete[] candidates_count;
+  delete[] candidates;
+  delete ceci_tree;
 
   // Set result in the ds and set the new column name for the (isomor matching 's) result.
   auto status = finish(ResultBuilder().value(std::move(ds)).build());
