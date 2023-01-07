@@ -8,14 +8,38 @@
 namespace nebula {
 namespace graph {
 
-static const char kDefaultProp[] = "default";  //
+static const char kDefaultProp[] = "label";  //
 
-std::unique_ptr<Graph> IsomorExecutor::generateGraph(Iterator* vIter, Iterator* eIter) {
+StatusOr<std::unique_ptr<Graph>> IsomorExecutor::generateGraph(PropIter* vIter,
+                                                               PropIter* eIter,
+                                                               std::string labelName) {
   uint32_t vCount = vIter->size();
   uint32_t lCount = vIter->size();
   uint32_t eCount = eIter->size();
 
-  LOG(INFO) << "vCound: " << vCount << " lCount: " << lCount << " eCount: " << eCount;
+  LOG(INFO) << "vertex count: " << vCount;
+  LOG(INFO) << "label count: " << lCount;
+  LOG(INFO) << "edge count: " << eCount;
+
+  // auto vertexColMap = vIter->getColIndices();
+  // auto edgeColMap = eIter->getColIndices();
+  // if (vertexColMap.size() < 1 || edgeColMap.size() < 1) {
+  //   return Status::Error("vertex or edge column smaller than 1");
+  // }
+
+  // std::string tagName;
+  // std::string edgeName;
+  // for (auto entry : vertexColMap) {
+  //   if (entry.first.find(labelName)) {
+  //     tagName = entry.first.substr(0, entry.first.find("."));
+  //     break;
+  //   }
+  // }
+  // for (auto entry : edgeColMap) {
+  //   if (entry.first.find(labelName)) {
+  //     edgeName = entry.first.substr(0, entry.first.find("."));
+  //   }
+  // }
 
   // Example:
   // Vetices 3: 0, 1, 2, 3
@@ -29,7 +53,7 @@ std::unique_ptr<Graph> IsomorExecutor::generateGraph(Iterator* vIter, Iterator* 
   // degree[1] = 2
   // degree[2] = 2
   // degree[3] = 2
-  std::vector<uint32_t> degree(vCount);
+  std::vector<uint32_t> degree(vCount, 0);
 
   // To store the starting position of each vertex in neighborhood array.
   unsigned int* offset = new unsigned int[vCount + 1];
@@ -52,7 +76,7 @@ std::unique_ptr<Graph> IsomorExecutor::generateGraph(Iterator* vIter, Iterator* 
   while (vIter->valid()) {
     const auto vertex = vIter->getColumn(nebula::kVid);  // check if v is a vertex
     auto vId = vertex.getInt();
-    const auto label = vIter->getColumn(nebula::graph::kDefaultProp);  // get label by index
+    const auto label = vIter->getTagProp("*", labelName);  // get label by index
     auto lId = label.getInt();
     labels[vId] = lId;
     vIter->next();
@@ -62,7 +86,7 @@ std::unique_ptr<Graph> IsomorExecutor::generateGraph(Iterator* vIter, Iterator* 
   // calculate out degree
   while (eIter->valid()) {
     auto s = eIter->getEdgeProp("*", kSrc);
-    auto src = s.getInt();
+    auto src = s.getInt();  // vid starts from 0
     degree[src]++;
     eIter->next();
   }
@@ -86,7 +110,7 @@ std::unique_ptr<Graph> IsomorExecutor::generateGraph(Iterator* vIter, Iterator* 
   }
 
   auto graph = std::make_unique<Graph>();
-  graph->loadGraphFromExecutor(vCount, lCount, eCount, offset, neighbors, labels);
+  graph->loadGraphFromExecutor(vCount, lCount, eCount, offset, neighbors, labels, degree);
 
   delete[] offset;
   delete[] neighbors;
@@ -107,39 +131,53 @@ folly::Future<Status> IsomorExecutor::execute() {
   auto iterQE = ectx_->getResult(isomor->getqScanEOut()).iter();
 
   LOG(INFO) << "iter dv: " << iterDV->size() << " iterQV: " << iterQV->size();
+  LOG(INFO) << "iter de: " << iterDE->size() << " iterQE: " << iterQE->size();
 
-  auto dataGraph = generateGraph(iterDV.get(), iterDE.get());
-  auto queryGraph = generateGraph(iterQV.get(), iterQE.get());
+  // auto dataGraphRet = generateGraph(static_cast<PropIter*>(iterDV.get()),
+  //                                   static_cast<PropIter*>(iterDE.get()),
+  //                                   isomor->getLabel());
+  auto queryGraphRet = generateGraph(static_cast<PropIter*>(iterQV.get()),
+                                     static_cast<PropIter*>(iterQE.get()),
+                                     isomor->getLabel());
 
-  ui** candidates = nullptr;
-  ui* candidates_count = nullptr;
+  // if (!dataGraphRet.ok() || !queryGraphRet.ok()) {
+  //   return Status::Error("Generating graph error!");
+  // }
 
-  TreeNode* ceci_tree = nullptr;
-  ui* ceci_order = nullptr;
-  ui* provenance = nullptr;
+  // auto dataGraph = std::move(dataGraphRet).value();
+  auto queryGraph = std::move(queryGraphRet).value();
 
-  std::vector<std::unordered_map<V_ID, std::vector<V_ID>>>
-      P_Candidates;  //  Parent, first branch, second branch.
-  std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> P_Provenance;
-  // std::cout"Provenance Function: " << std::endl:endl;
+  // dataGraph->printGraph();
+  queryGraph->printGraph();
 
-  auto result = CECIFunction(dataGraph.get(),
-                             queryGraph.get(),
-                             candidates,
-                             candidates_count,
-                             ceci_order,
-                             provenance,
-                             ceci_tree,
-                             P_Candidates,
-                             P_Provenance);
+  // ui** candidates = nullptr;
+  // ui* candidates_count = nullptr;
 
-  ds.emplace_back(nebula::Row({result}));
+  // TreeNode* ceci_tree = nullptr;
+  // ui* ceci_order = nullptr;
+  // ui* provenance = nullptr;
 
-  delete[] ceci_order;
-  delete[] provenance;
-  delete[] candidates_count;
-  delete[] candidates;
-  delete ceci_tree;
+  // //  Parent, first branch, second branch.
+  // std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> P_Candidates;
+  // std::vector<std::unordered_map<V_ID, std::vector<V_ID>>> P_Provenance;
+
+  // auto result = CECIFunction(dataGraph.get(),
+  //                            queryGraph.get(),
+  //                            candidates,
+  //                            candidates_count,
+  //                            ceci_order,
+  //                            provenance,
+  //                            ceci_tree,
+  //                            P_Candidates,
+  //                            P_Provenance);
+
+  // ds.emplace_back(nebula::Row({result}));
+
+  // delete[] ceci_order;
+  // delete[] provenance;
+  // delete[] candidates_count;
+  // delete[] candidates;
+  // delete ceci_tree;
 
   // Set result in the ds and set the new column name for the (isomor matching 's) result.
   auto status = finish(ResultBuilder().value(std::move(ds)).build());

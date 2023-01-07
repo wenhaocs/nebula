@@ -6,26 +6,22 @@
 #include <iostream>
 #include <vector>
 
+#include "common/base/Base.h"
+
 void Graph::printGraph() {
-  std::cout << "|V|: " << v_count << ", |E|: " << e_count << ", |L|: " << l_count << std::endl;
-  std::cout << "Max Degree: " << max_degree << ", Max Label Frequency: " << max_label_frequency
-            << std::endl;
-  printf("Neighbourhood: ");
+  LOG(INFO) << "|V|: " << v_count << ", |E|: " << e_count << ", |L|: " << l_count;
+  LOG(INFO) << "Max Degree: " << max_degree << ", Max Label Frequency: " << max_label_frequency;
+  LOG(INFO) << "Neighbourhood: ";
   // for (int i = 0; i < v_count; i ++) {
   //     printf("%d, ", offsets[i]);
   //
   // }
-  printf("\n");
   for (ui i = 0; i < v_count; i++) {
-    printf("V_ID: %d, offsets: %d:", i, offsets[i]);
+    LOG(INFO) << "V_ID: " << i << ", offsets: " << offsets[i];
     for (ui j = offsets[i]; j < offsets[i + 1]; j++) {
-      printf("%d, ", neighbors[j]);
-      std::cout << " (" << getVertexLabel(neighbors[j]) << ") ";
+      LOG(INFO) << neighbors[j] << " (" << getVertexLabel(neighbors[j]) << ") ";
     }
-    printf("\n");
   }
-
-  printf("\n");
 }
 
 void Graph::BuildReverseIndex() {
@@ -77,7 +73,8 @@ void Graph::loadGraphFromExecutor(unsigned int v_c,
                                   unsigned int e_c,
                                   unsigned int *off,
                                   unsigned int *nei,
-                                  unsigned int *lab) {
+                                  unsigned int *lab,
+                                  std::vector<uint32_t> &degrees) {
   this->v_count = v_c;
   this->l_count = l_c;
   this->e_count = e_c;
@@ -93,6 +90,12 @@ void Graph::loadGraphFromExecutor(unsigned int v_c,
     this->neighbors[i] = nei[i];
   }
 
+  for (auto const d : degrees) {
+    if (d > max_degree) {
+      max_degree = d;
+    }
+  }
+
   L_ID max_label_id = 0;
   for (ui i = 0; i < v_count; ++i) {
     this->labels[i] = lab[i];
@@ -102,12 +105,20 @@ void Graph::loadGraphFromExecutor(unsigned int v_c,
         max_label_id = lab[i];
       }
     }
+    labels_frequency[lab[i]] += 1;
   }
   // Initialize label count;
   if (labels_frequency.size() > max_label_id + 1) {
     l_count = labels_frequency.size();
   } else {
     l_count = max_label_id + 1;
+  }
+
+  for (auto item : labels_frequency) {
+    // std::coutitem.second << " ";
+    if (item.second > max_label_frequency) {
+      max_label_frequency = item.second;
+    }
   }
 
   BuildReverseIndex();

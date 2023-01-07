@@ -70,7 +70,8 @@ class Graph {
                              unsigned int e_count,
                              unsigned int* offset,
                              unsigned int* neighbors,
-                             unsigned int* labels);
+                             unsigned int* labels,
+                             std::vector<uint32_t>& degrees);
 
   void printGraph();
 
@@ -108,7 +109,7 @@ class Graph {
   }
 
   ui* getVertexNeighbors(const V_ID id, ui& count) {
-    count = offsets[id + 1] - offsets[id];
+    count = getVertexDegree(id);
     return neighbors + offsets[id];
   }
 

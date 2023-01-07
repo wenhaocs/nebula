@@ -27,25 +27,18 @@ StatusOr<SubPlan> IsomorPlanner::transform(AstContext* astCtx) {
   auto qScanEdges = createScanEdgesPlan(qctx, qSpaceId, dScanEdges);
 
   auto isomor = Isomor::make(qctx,
+                             qScanEdges,
+                             kDefaultProp,
                              dScanVertics->outputVar(),
                              qScanVertics->outputVar(),
                              dScanEdges->outputVar(),
                              qScanEdges->outputVar());
-  isomor->addDep(dScanVertics);
-  isomor->addDep(qScanVertics);
-  isomor->addDep(dScanEdges);
-  isomor->addDep(qScanEdges);
-
-  isomor->setInputVars({dScanVertics->outputVar(),
-                        qScanVertics->outputVar(),
-                        dScanEdges->outputVar(),
-                        qScanEdges->outputVar()});
 
   isomor->setColNames({koutputCol});
 
   SubPlan subPlan;
   subPlan.root = isomor;
-  subPlan.tail = qScanEdges;
+  subPlan.tail = dScanVertics;
   return subPlan;
 }
 
@@ -77,7 +70,7 @@ PlanNode* IsomorPlanner::createScanVerticesPlan(QueryContext* qctx,
   colNames.emplace_back(tagName + "." + std::string(kDefaultProp));
 
   auto* scanVertices =
-      ScanVertices::make(qctx, input, spaceId, std::move(vProps), nullptr, false, {}, 10);
+      ScanVertices::make(qctx, input, spaceId, std::move(vProps), nullptr, false, {});
   scanVertices->setColNames(std::move(colNames));
 
   return scanVertices;
@@ -97,14 +90,14 @@ PlanNode* IsomorPlanner::createScanEdgesPlan(QueryContext* qctx,
     auto edgeNameRet = qctx->schemaMng()->toEdgeName(spaceId, edgeType);
     DCHECK(edgeNameRet.ok());
     edgeName = std::move(edgeNameRet.value());
-    // LOG(INFO) << "edge type: " << edgeType << "edge name: " << edgeName;
+    LOG(INFO) << "edge type: " << edgeType << "edge name: " << edgeName;
   }
 
   auto eProps = std::make_unique<std::vector<storage::cpp2::EdgeProp>>();
   std::vector<std::string> colNames;
 
   storage::cpp2::EdgeProp eProp;
-  std::vector<std::string> props = {kSrc, kType, kRank, kDst, kDefaultProp};
+  std::vector<std::string> props = {kSrc, kType, kRank, kDst};
 
   // add column name
   for (auto prop : props) {
@@ -115,7 +108,7 @@ PlanNode* IsomorPlanner::createScanEdgesPlan(QueryContext* qctx,
   eProp.props_ref() = std::move(props);
   eProps->emplace_back(std::move(eProp));
 
-  auto* scanEdges = ScanEdges::make(qctx, input, spaceId, std::move(eProps), nullptr, false, 10);
+  auto* scanEdges = ScanEdges::make(qctx, input, spaceId, std::move(eProps), nullptr, false);
   scanEdges->setColNames(std::move(colNames));
 
   return scanEdges;

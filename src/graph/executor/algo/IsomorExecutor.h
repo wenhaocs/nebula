@@ -20,7 +20,9 @@ class IsomorExecutor : public Executor {
 
  private:
   std::unordered_map<Value, int64_t> historyVids_;
-  std::unique_ptr<Graph> generateGraph(Iterator* vIter, Iterator* eIter);
+  StatusOr<std::unique_ptr<Graph>> generateGraph(PropIter* vIter,
+                                                 PropIter* eIter,
+                                                 std::string labelName);
 };
 
 }  // namespace graph

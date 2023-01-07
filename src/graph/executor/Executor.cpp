@@ -47,11 +47,11 @@
 #include "graph/executor/admin/ZoneExecutor.h"
 #include "graph/executor/algo/BFSShortestPathExecutor.h"
 #include "graph/executor/algo/CartesianProductExecutor.h"
+#include "graph/executor/algo/IsomorExecutor.h"
 #include "graph/executor/algo/MultiShortestPathExecutor.h"
 #include "graph/executor/algo/ProduceAllPathsExecutor.h"
 #include "graph/executor/algo/ShortestPathExecutor.h"
 #include "graph/executor/algo/SubgraphExecutor.h"
-#include "graph/executor/algo/IsomorExecutor.h"
 #include "graph/executor/logic/ArgumentExecutor.h"
 #include "graph/executor/logic/LoopExecutor.h"
 #include "graph/executor/logic/PassThroughExecutor.h"
@@ -103,7 +103,7 @@
 
 using folly::stringPrintf;
 
-DEFINE_bool(enable_lifetime_optimize, true, "Does enable the lifetime optimize.");
+DEFINE_bool(enable_lifetime_optimize, false, "Does enable the lifetime optimize.");
 DECLARE_double(system_memory_high_watermark_ratio);
 
 namespace nebula {
@@ -718,7 +718,6 @@ Status Executor::finish(Result &&result) {
     numRows_ = result.size();
     result.checkMemory(node()->isQueryNode());
     ectx_->setResult(node()->outputVar(), std::move(result));
-    LOG(INFO) << "writing result to: " << node()->outputVar();
   } else {
     VLOG(1) << "Drop variable " << node()->outputVar();
   }

@@ -28,8 +28,8 @@ Status IsomorValidator::validateTag(const NameLabelList *nameLabels) {
   auto dataSpaceRet = qctx_->schemaMng()->toGraphSpaceID(*graphs[1]);
   NG_RETURN_IF_ERROR(dataSpaceRet);
 
-  fetchCtx_->querySpace = querySpaceRet.value();
-  fetchCtx_->dataSpace = dataSpaceRet.value();
+  fetchCtx_->querySpace = std::move(querySpaceRet).value();
+  fetchCtx_->dataSpace = std::move(dataSpaceRet).value();
   return Status::OK();
 }
 }  // namespace graph
