@@ -15,7 +15,6 @@ namespace nebula {
 namespace graph {
 
 folly::Future<Status> ScanEdgesExecutor::execute() {
-  LOG(INFO) << "In scanedges executor";
   return scanEdges();
 }
 

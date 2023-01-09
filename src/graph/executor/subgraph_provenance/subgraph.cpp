@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "common/base/Base.h"
 #include "computesetintersection.h"
 #include "trees.h"
 #define INVALID_VERTEX_ID 99999
@@ -2533,7 +2534,7 @@ int64_t CECIFunction(Graph *data_graph,
     ZFComputeNLF(
         data_graph, query_graph, order[i], candidates_count[order[i]], candidates[order[i]]);
   }
-  std::cout << "begin" << std::endl;
+  std::cout << "begin";
 
   // The number of refinement is k. According to the original paper, we set k as 3.
   for (ui k = 0; k < 3; ++k) {
@@ -2571,10 +2572,9 @@ int64_t CECIFunction(Graph *data_graph,
   compactCandidates(candidates, candidates_count, query_count);
 
   for (ui j = 0; j < query_count; j++) {
-    std::cout << "u->" << order[j] << "Candidates_count->" << candidates_count[order[j]]
-              << std::endl;
+    LOG(INFO) << "u->" << order[j] << "Candidates_count->" << candidates_count[order[j]];
   }
-  std::cout << "Done with Filter" << std::endl;
+  LOG(INFO) << "Done with Filter";
 
   candidates_count_index[order[0]] = candidates_count[order[0]];
 
@@ -2695,7 +2695,7 @@ int64_t CECIFunction(Graph *data_graph,
 
   // No Candidates with the root
   if (candidates_count[root] == 0) {
-    std::cout << "Build Candidate Fail" << std::endl;
+    std::cout << "Build Candidate Fail";
     return false;
   }
 
@@ -3166,7 +3166,7 @@ int64_t CECIFunction(Graph *data_graph,
       }
 
       if (candidates_count_index[u] == 0) {
-        std::cout << "Node: " << u << " Fail" << std::endl;
+        LOG(INFO) << "Node: " << u << " Fail";
         // std::cout <<"Pro: " << std::endl;
         return false;
       }
@@ -3188,14 +3188,14 @@ int64_t CECIFunction(Graph *data_graph,
     std::cout << " ### Reverse Refinement" << std::endl;
   }
 
-  std::cout << "Refinement->" << std::endl;
+  LOG(INFO) << "Refinement->";
 
   for (int i = query_count - 1; i >= 0; i--) {
     // std::cout <<"Current u->";
     ui u = order[i];
     // std::cout <<u << std::endl;
     Refinement(intersetion, order, tree, u, P_Candidates, data_provenance, data_graph);
-    std::cout << "After Refine ----> ######## P->" << P_Candidates[u].size() << std::endl;
+    LOG(INFO) << "After Refine ----> ######## P->" << P_Candidates[u].size();
   }
 
   int all_cc = 0;
@@ -3294,7 +3294,7 @@ std::cout <<i << std::endl;
   ui order_count_1 = 0;
   ui order_count_2 = 0;
 
-  std::cout << "in" << std::endl;
+  LOG(INFO) << "in";
 
   bool split = false;
 
@@ -3328,7 +3328,7 @@ std::cout <<i << std::endl;
     while (MyReadFile >> id) {
       MyReadFile >> class_id;
 
-      std::cout << id << "," << class_id << std::endl;
+      LOG(INFO) << id << "," << class_id;
     }
 
     // Close the file
@@ -3371,7 +3371,7 @@ std::cout <<i << std::endl;
   }
   if (order_count_1 <= 2 || order_count_2 <= 2) {
     // nodo = true;
-    std::cout << "Should not do it" << std::endl;
+    LOG(INFO) << "Should not do it";
     order_count_1 = order_1_d_count;
     order_count_2 = order_2_d_count;
     for (ui i = 0; i < order_count_1; i++) {
@@ -3395,8 +3395,7 @@ std::cout <<i << std::endl;
                      visited);
 
   for (ui j = 0; j < query_count; j++) {
-    std::cout << "u->" << order[j] << "Candidates_count->" << candidates_count_index[order[j]]
-              << std::endl;
+    LOG(INFO) << "u->" << order[j] << "Candidates_count->" << candidates_count_index[order[j]];
   }
 
   for (ui i = 1; i < order_count_1; i++) {
@@ -3419,7 +3418,7 @@ std::cout <<i << std::endl;
     }
   }
 
-  std::cout << "out" << std::endl;
+  LOG(INFO) << "out";
 
   // std::cout <<"Test 2" << std::endl;
   bool *p_3_1 = new bool[query_count];
@@ -3604,31 +3603,33 @@ std::cout <<i << std::endl;
   std::vector<V_ID> order_index_2(query_count);
 
   // std::cout <<"Group original->";
+  std::string query_vertex_str = "";
   for (ui i = 0; i < query_count; i++) {
     ui query_vertex = order[i];
-    std::cout << query_vertex << ",";
+    query_vertex_str = query_vertex_str + std::to_string(query_vertex) + ",";
     order_index_1[query_vertex] = 99999;
     order_index_2[query_vertex] = 99999;
   }
+  LOG(INFO) << query_vertex_str;
 
-  std::cout << "Group 1->" << std::endl;
+  LOG(INFO) << "Group 1->";
 
+  query_vertex_str = "";
   for (ui i = 0; i < order_count_1; i++) {
     ui query_vertex = order_1[i];
-    std::cout << query_vertex << ",";
+    query_vertex_str = query_vertex_str + std::to_string(query_vertex) + ",";
     order_index_1[query_vertex] = i;
   }
+  LOG(INFO) << query_vertex_str;
 
-  std::cout << std::endl;
-
-  std::cout << "Group 2->" << std::endl;
+  LOG(INFO) << "Group 2->";
+  query_vertex_str = "";
   for (ui i = 0; i < order_count_2; i++) {
     ui query_vertex = order_2[i];
-    std::cout << query_vertex << ",";
+    query_vertex_str = query_vertex_str + std::to_string(query_vertex) + ",";
     order_index_2[query_vertex] = i;
   }
-
-  std::cout << std::endl;
+  LOG(INFO) << query_vertex_str;
 
   // static bool *visit_all = new bool[data_count*data_count];
   // std::fill(visit_all, visit_all+data_count*data_count, false);
@@ -3668,7 +3669,7 @@ std::cout <<i << std::endl;
   }
   */
 
-  std::cout << "Middle->" << std::endl;
+  LOG(INFO) << "Middle->";
   // Connection and offset.
   // static V_ID *visit_local_2 = new V_ID[data_count];
 
@@ -3750,7 +3751,7 @@ std::cout <<i << std::endl;
   ui u = order_1[0];
   static V_ID res_r_1[32];
 
-  std::cout << "Before" << std::endl;
+  LOG(INFO) << "Before";
 
   auto f_4 = std::chrono::steady_clock::now();
 
@@ -3880,7 +3881,7 @@ std::cout <<i << std::endl;
   if (order_count_2 <= 1) {
     ui bfs_order_1 = 1;
 
-    std::cout << "Enumerate 1" << std::endl;
+    LOG(INFO) << "Enumerate 1";
     enumeration_bfs2(visited,
                      res_all_1,
                      candidates_index,
@@ -3912,13 +3913,13 @@ std::cout <<i << std::endl;
 
     f_5 = std::chrono::steady_clock::now();
 
-    std::cout << embedding << "," << 0 << ","
+    LOG(INFO) << embedding << "," << 0 << ","
               << std::chrono::duration_cast<std::chrono::nanoseconds>(f_5 - f_4).count() /
                      1000000000.0
               << ","
               << std::chrono::duration_cast<std::chrono::nanoseconds>(f_5 - f_4).count() /
                      1000000000.0
-              << "," << res_all_1 << std::endl;
+              << "," << res_all_1;
 
     // freopen("output.txt", "a", stdout);
     // std::cout <<embedding << "," << 0 << ","
@@ -3930,7 +3931,7 @@ std::cout <<i << std::endl;
   } else {
     ui bfs_order_1 = 1;
 
-    std::cout << "Enumerate 1" << std::endl;
+    LOG(INFO) << "Enumerate 1";
     enumeration_bfs2(visited,
                      res_all_1,
                      candidates_index,
@@ -3954,7 +3955,7 @@ std::cout <<i << std::endl;
 
     f_5 = std::chrono::steady_clock::now();
   }
-  std::cout << "Done with enumeration 1" << std::endl;
+  LOG(INFO) << "Done with enumeration 1";
 
   auto f_6 = std::chrono::steady_clock::now();
 
@@ -3976,7 +3977,7 @@ std::cout <<i << std::endl;
     std::fill(valid_2[i], valid_2[i] + candidates_l_2[order_count_2 - 1], false);
   }
 
-  std::cout << "Test" << std::endl;
+  LOG(INFO) << "Test";
   for (ui i = 0; i < candidates_l_1[order_count_1 - 1]; i++) {
     valid_1[order_count_1 - 1][i] = true;
   }
@@ -4032,7 +4033,7 @@ std::cout <<i << std::endl;
     }
   }
 
-  std::cout << "Initial Test" << std::endl;
+  LOG(INFO) << "Initial Test";
 
   for (int64_t i = 0; i < candidates_l_1[order_count_1 - 1]; i++) {
     res_1_r[i][order_count_1 - 1] = res_1[order_count_1 - 1][i];
@@ -4042,7 +4043,7 @@ std::cout <<i << std::endl;
       res_1_r[i][j] = res_1[j][t];
     }
   }
-  std::cout << "End point 1:" << std::endl;
+  LOG(INFO) << "End point 1:";
   for (int64_t i = 0; i < candidates_l_2[order_count_2 - 1]; i++) {
     res_2_r[i] = new V_ID[order_count_2];
   }
@@ -4054,14 +4055,14 @@ std::cout <<i << std::endl;
       res_2_r[i][j] = res_2[j][t];
     }
   }
-  std::cout << std::endl << "Test all" << std::endl;
+  LOG(INFO) << "Test all";
 
   bool *visit_q_1 = new bool[order_count_1];
 
   std::fill(visit_q_1, visit_q_1 + order_count_1, false);
 
   p_1 = p_1_1 - 1;
-  std::cout << order_count_1 - p_1 << std::endl;
+  LOG(INFO) << order_count_1 - p_1;
   std::vector<ui> p_all;
   for (ui i = 0; i < order_count_2; i++) {
     if (con_2[i] > 0) {
@@ -4081,8 +4082,8 @@ std::cout <<i << std::endl;
     res_s[d_1] = 0;
   }
 
-  std::cout << "I->" << candidates_l_1[order_count_1 - 1] << std::endl;
-  std::cout << "J->" << candidates_l_2[order_count_2 - 1] << std::endl;
+  LOG(INFO) << "I->" << candidates_l_1[order_count_1 - 1];
+  LOG(INFO) << "J->" << candidates_l_2[order_count_2 - 1];
 
   // double timer_middle = omp_get_wtime();
   int64_t total_sum = 0;
@@ -4415,7 +4416,7 @@ std::cout <<i << std::endl;
     }
   }
   // std::cout <<"Total 2:" << total_2 << std::endl;
-  std::cout << "Data count" << data_count << std::endl;
+  LOG(INFO) << "Data count" << data_count;
   total_result = total_sum;
 
   // double timer_end = omp_get_wtime();
@@ -4426,12 +4427,12 @@ std::cout <<i << std::endl;
   // 1000000000.0;  // timer_start1;
   // double timer_took3 = timer_took;
 
-  std::cout << "call count->" << call_count << ", per call nanoseconds->" << std::endl;
+  LOG(INFO) << "call count->" << call_count << ", per call nanoseconds->";
   //<< timer_took * 1000000000.0 / call_count << std::endl;
-  std::cout
-      << "total results:" << total_result
-      << std::endl;  // ",Time:" << timer_took << ",local enumeration-->"
-                     // << (timer_local_enumeration - timer_start1) * 100 / timer_took << std::endl;
+  LOG(INFO) << "total results:"
+            << total_result;  // ",Time:" << timer_took << ",local enumeration-->"
+                              // << (timer_local_enumeration - timer_start1) * 100 / timer_took <<
+                              // std::endl;
 
   //   (6) Global node based-enumeration result comparasion
   // std::cout <<"Start enumeration" <<  endl;
@@ -4471,7 +4472,7 @@ std::cout <<i << std::endl;
     ui bfs_order = 0;
     query_count -= 1;
     // int64_t single_res;
-    std::cout << "Start-->" << std::endl;
+    LOG(INFO) << "Start-->";
     int64_t bfs_count = 0;
 
     for (const auto &it4 : P_Candidates[u]) {
@@ -4490,24 +4491,21 @@ std::cout <<i << std::endl;
   }
 
   // auto second =std::chrono::steady_clock::now();
-  std::cout << "P_1 Time->"
+  LOG(INFO) << "P_1 Time->"
             << std::chrono::duration_cast<std::chrono::nanoseconds>(f_5 - f_4).count() /
-                   1000000000.0
-            << std::endl;
-  std::cout << "P_2 Time->"
+                   1000000000.0;
+  LOG(INFO) << "P_2 Time->"
             << std::chrono::duration_cast<std::chrono::nanoseconds>(f_6 - f_5).count() /
-                   1000000000.0
-            << std::endl;
-  std::cout << "DFS Time->"
+                   1000000000.0;
+  LOG(INFO) << "DFS Time->"
             << std::chrono::duration_cast<std::chrono::nanoseconds>(f_2 - first).count() /
-                   1000000000.0
-            << std::endl;
+                   1000000000.0;
 
   // timer_end = omp_get_wtime();
-  std::cout << "BFS->"
+  LOG(INFO) << "BFS->"
             << std::chrono::duration_cast<std::chrono::nanoseconds>(f_3 - f_2).count() /
-                   1000000000.0
-            << std::endl;
+                   1000000000.0;
+
   // double last_r = timer_took;
   // timer_took = timer_end - timer_start;
   // std::cout << "Node total results:" << candidates_l[query_count - 1] - total_result
@@ -4518,11 +4516,12 @@ std::cout <<i << std::endl;
 
   // freopen("output.txt", "a", stdout);
 
-  // std::cout <<total_result << "," << candidates_l[query_count-1] - total_result << "," <<
-  // timer_took3
-  //  << "," <<std::chrono::duration_cast<std::chrono::nanoseconds>(f_3 - f_2).count()/1000000000.0
-  //  << ","
-  //  << call_count << std::endl;
+  LOG(INFO) << total_result << "," << candidates_l[query_count - 1] - total_result
+            << ","
+            // << timer_took3 << ","
+            // << std::chrono::duration_cast<std::chrono::nanoseconds>(f_3 - f_2).count() /
+            //        1000000000.0
+            << "," << call_count;
 
   // fclose(stdout);
 

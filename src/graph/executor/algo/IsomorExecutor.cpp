@@ -17,9 +17,9 @@ StatusOr<std::unique_ptr<Graph>> IsomorExecutor::generateGraph(PropIter* vIter,
   uint32_t lCount = vIter->size();
   uint32_t eCount = eIter->size();
 
-  LOG(INFO) << "vertex count: " << vCount;
-  LOG(INFO) << "label count: " << lCount;
-  LOG(INFO) << "edge count: " << eCount;
+  // LOG(INFO) << "vertex count: " << vCount;
+  // LOG(INFO) << "label count: " << lCount;
+  // LOG(INFO) << "edge count: " << eCount;
 
   // auto vertexColMap = vIter->getColIndices();
   // auto edgeColMap = eIter->getColIndices();
