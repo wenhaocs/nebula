@@ -2572,7 +2572,7 @@ int64_t CECIFunction(Graph *data_graph,
   compactCandidates(candidates, candidates_count, query_count);
 
   for (ui j = 0; j < query_count; j++) {
-    LOG(INFO) << "u->" << order[j] << "Candidates_count->" << candidates_count[order[j]];
+    LOG(INFO) << "u->" << order[j] << ". Candidates_count->" << candidates_count[order[j]];
   }
   LOG(INFO) << "Done with Filter";
 
@@ -2695,7 +2695,7 @@ int64_t CECIFunction(Graph *data_graph,
 
   // No Candidates with the root
   if (candidates_count[root] == 0) {
-    std::cout << "Build Candidate Fail";
+    LOG(INFO) << "Build Candidate Fail";
     return false;
   }
 
